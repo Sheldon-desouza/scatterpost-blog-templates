@@ -14,6 +14,13 @@ export interface SiteLink {
 export const NAV_LINKS: SiteLink[] = [{ label: "Writing", href: "/blog" }];
 
 /**
+ * The one-line bio under the author's name on the home page. Plain
+ * text, no scatterpost mention: replace with your own before you
+ * publish (what you write about, what you build, and so on).
+ */
+export const BIO = "Notes on building products, what shipped and what I learned along the way.";
+
+/**
  * Shown as a quiet row under the one-line bio on the home page. A
  * placeholder set, replace with your own (GitHub, X, email, and so on).
  */

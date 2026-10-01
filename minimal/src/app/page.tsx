@@ -3,7 +3,7 @@ import { getStore } from "../lib/site.ts";
 import { authorName, authorUrl, sameAsUrls, siteName, siteUrl } from "../lib/site.ts";
 import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
 import { readingTime } from "../lib/reading-time.ts";
-import { SOCIAL_LINKS } from "../lib/config.ts";
+import { BIO, SOCIAL_LINKS } from "../lib/config.ts";
 import { PostIndex } from "../components/PostIndex.tsx";
 
 export default async function HomePage() {
@@ -28,13 +28,7 @@ export default async function HomePage() {
     <div>
       <section className="home-hero">
         <h1>{authorName()}</h1>
-        <p className="home-bio">
-          Writing from {siteName()}, published with{" "}
-          <a href="https://scatterpost.io" className="underline">
-            scatterpost
-          </a>
-          : it publishes here first, then cross-posts elsewhere with a canonical link back.
-        </p>
+        <p className="home-bio">{BIO}</p>
         {SOCIAL_LINKS.length > 0 ? (
           <nav className="home-links" aria-label="Elsewhere">
             {SOCIAL_LINKS.map((link) => (
@@ -60,20 +54,31 @@ export default async function HomePage() {
       ) : (
         <>
           {featured ? (
-            <Link href={`/blog/${featured.slug}`} className="featured-post block">
-              <p className="featured-kicker">
-                Latest &middot;{" "}
-                <time dateTime={featured.date}>
-                  {new Date(featured.date).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </time>{" "}
-                &middot; {readingTime(featured.bodyMarkdown)}
-              </p>
-              <h2>{featured.title}</h2>
-              {featured.description ? <p>{featured.description}</p> : null}
+            <Link
+              href={`/blog/${featured.slug}`}
+              className={`featured-post${featured.cover ? " featured-post-with-cover" : ""}`}
+            >
+              {featured.cover ? (
+                <div className="featured-cover">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={featured.cover} alt={featured.title} width={600} height={400} />
+                </div>
+              ) : null}
+              <div className="featured-body">
+                <p className="featured-kicker">
+                  Latest &middot;{" "}
+                  <time dateTime={featured.date}>
+                    {new Date(featured.date).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </time>{" "}
+                  &middot; {readingTime(featured.bodyMarkdown)}
+                </p>
+                <h2>{featured.title}</h2>
+                {featured.description ? <p>{featured.description}</p> : null}
+              </div>
             </Link>
           ) : null}
 
