@@ -1,8 +1,12 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { authorName, authorUrl, getStore, postUrl, siteName, siteUrl } from "../../../lib/site.ts";
 import { renderMarkdown } from "../../../lib/scatterpost/render-markdown.ts";
 import { isValidSlug, serialiseJsonLd } from "../../../lib/scatterpost/safe-html.ts";
+import { readingTime } from "../../../lib/reading-time.ts";
+import { annotateHeadings } from "../../../lib/toc.ts";
+import { CodeBlocks } from "../../../components/CodeBlocks.tsx";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -26,6 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "article",
       publishedTime: post.date,
       tags: post.tags,
+      images: post.cover ? [post.cover] : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -33,6 +38,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: post.description,
     },
   };
+}
+
+function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
@@ -43,13 +52,20 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!isValidSlug(slug)) {
     notFound();
   }
-  const post = await getStore().get(slug);
+  const posts = await getStore().list();
+  const index = posts.findIndex((candidate) => candidate.slug === slug);
+  const post = index === -1 ? await getStore().get(slug) : posts[index];
   if (!post) {
     notFound();
   }
+  // Newest first: the next item in the array is older (prev), the
+  // previous item is newer (next).
+  const previousPost = index > -1 ? posts[index + 1] : undefined;
+  const nextPost = index > 0 ? posts[index - 1] : undefined;
 
   const canonical = post.canonical ?? postUrl(post.slug);
-  const html = renderMarkdown(post.bodyMarkdown);
+  const rendered = renderMarkdown(post.bodyMarkdown);
+  const { html, toc } = annotateHeadings(rendered);
   const site = siteUrl();
 
   const author = authorUrl()
@@ -80,26 +96,79 @@ export default async function BlogPostPage({ params }: PageProps) {
     ],
   };
 
+  const showToc = toc.length >= 3;
+
   return (
-    <div className="measure flex flex-col gap-4">
+    <div className="post-layout">
       <article>
-        <h1 className="text-3xl font-semibold">{post.title}</h1>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          By {authorUrl() ? (
-            <a href={authorUrl()} className="underline">
-              {authorName()}
-            </a>
+        <p className="post-kicker">
+          <time dateTime={post.date}>{formatDate(post.date)}</time>
+          <span aria-hidden="true">&middot;</span>
+          <span>{readingTime(post.bodyMarkdown)}</span>
+          {post.tags.map((tag) => (
+            <span key={tag} className="tag-pill">
+              {tag}
+            </span>
+          ))}
+        </p>
+        <h1 className="post-h1">{post.title}</h1>
+        <p className="post-byline">
+          By{" "}
+          {authorUrl() ? (
+            <a href={authorUrl()}>{authorName()}</a>
           ) : (
             authorName()
           )}
         </p>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          <time dateTime={post.date}>
-            {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
-          </time>
+        {post.description ? <p className="post-dek">{post.description}</p> : null}
+        {post.cover ? (
+          <p className="post-cover">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={post.cover} alt={post.title} width={1200} height={630} />
+          </p>
+        ) : null}
+        <div className="prose mt-10" dangerouslySetInnerHTML={{ __html: html }} />
+        <CodeBlocks />
+
+        {previousPost || nextPost ? (
+          <nav className="post-footer-nav" aria-label="More posts">
+            {previousPost ? (
+              <Link href={`/blog/${previousPost.slug}`} className="prev">
+                <span className="label">Previous</span>
+                <span className="title">{previousPost.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {nextPost ? (
+              <Link href={`/blog/${nextPost.slug}`} className="next">
+                <span className="label">Next</span>
+                <span className="title">{nextPost.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        ) : null}
+
+        <p className="subscribe-line">
+          Subscribe over <Link href="/feed.xml">RSS</Link>.
         </p>
-        <div className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
       </article>
+
+      {showToc ? (
+        <aside className="toc" aria-label="Table of contents">
+          <h2>On this page</h2>
+          <ol>
+            {toc.map((entry) => (
+              <li key={entry.id}>
+                <a href={`#${entry.id}`}>{entry.text}</a>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      ) : null}
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(breadcrumbJsonLd) }} />
     </div>
