@@ -1,15 +1,13 @@
-import Link from "next/link";
 import { getStore } from "../lib/site.ts";
 import { authorName, authorUrl, sameAsUrls, siteName, siteUrl } from "../lib/site.ts";
 import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
-import { Cover } from "../components/cover.tsx";
-import { TagChips } from "../components/tag-chips.tsx";
+import { collectTags, postsForTagSlug } from "../lib/tags.ts";
+import { LeadStory } from "../components/lead-story.tsx";
 import { PostCard } from "../components/post-card.tsx";
+import { AuthorBlock } from "../components/author-block.tsx";
 
 export default async function HomePage() {
   const posts = await getStore().list();
-  const [featured, ...rest] = posts;
-  const grid = rest.slice(0, 8);
   const site = siteUrl();
 
   const sameAs = sameAsUrls();
@@ -25,73 +23,67 @@ export default async function HomePage() {
     ],
   };
 
-  return (
-    <div className="flex flex-col gap-10">
-      <div className="measure flex flex-col gap-3">
-        <h1 className="font-display text-3xl font-semibold">{siteName()}</h1>
-        <p className="text-[var(--muted-foreground)]">
-          A blog by {authorName()}, published with{" "}
-          <a href="https://scatterpost.io" className="underline">
-            scatterpost
-          </a>
-          : it publishes to this site first, then cross-posts elsewhere with a
-          canonical link back here.
-        </p>
-      </div>
+  const [lead, ...rest] = posts;
 
-      {!featured ? (
-        <div className="measure rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-medium">No posts yet</h2>
-          <p className="mt-2">
-            This blog is ready to receive its first post. Connect it as a
-            Website channel in scatterpost with your deployed URL and a
-            webhook secret (<code>SCATTERPOST_WEBHOOK_SECRET</code>), or set
-            up pull mode with <code>SCATTERPOST_API_URL</code> and{" "}
-            <code>SCATTERPOST_API_KEY</code>. See this template&apos;s README
-            for the exact steps.
+  if (!lead) {
+    return (
+      <div>
+        <h1 className="sr-only">{siteName()}</h1>
+        <div className="empty-state">
+          <h2>No posts yet</h2>
+          <p>
+            This blog is ready to receive its first post. Connect it as a Website channel in scatterpost
+            with your deployed URL and a webhook secret (<code>SCATTERPOST_WEBHOOK_SECRET</code>), or set up
+            pull mode with <code>SCATTERPOST_API_URL</code> and <code>SCATTERPOST_API_KEY</code>. See this
+            template&apos;s README for the exact steps.
           </p>
         </div>
-      ) : (
-        <>
-          <article className="card featured">
-            <Link href={`/blog/${featured.slug}`} className="block">
-              <Cover title={featured.title} cover={featured.cover} priority />
-            </Link>
-            <div className="card-body">
-              <h2 className="font-display text-2xl font-semibold sm:text-3xl">
-                <Link href={`/blog/${featured.slug}`} className="underline">
-                  {featured.title}
-                </Link>
-              </h2>
-              <p className="text-sm text-[var(--muted-foreground)]">
-                <time dateTime={featured.date}>
-                  {new Date(featured.date).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </time>
-              </p>
-              {featured.description ? <p>{featured.description}</p> : null}
-              <TagChips tags={featured.tags} />
-            </div>
-          </article>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(jsonLd) }} />
+      </div>
+    );
+  }
 
-          {grid.length > 0 ? (
-            <div className="card-grid">
-              {grid.map((post) => (
-                <PostCard key={post.slug} post={post} />
-              ))}
-            </div>
-          ) : null}
-        </>
-      )}
+  // The 3-column grid of recent stories, then one "More on <tag>" section
+  // per tag still left over after the lead story and that grid, each
+  // capped at three posts so the home page stays scannable rather than
+  // repeating the whole archive by category.
+  const grid = rest.slice(0, 6);
+  const shown = new Set([lead.slug, ...grid.map((post) => post.slug)]);
+  const tagSections = collectTags(posts)
+    .map((summary) => ({
+      summary,
+      posts: postsForTagSlug(posts, summary.slug).filter((post) => !shown.has(post.slug)).slice(0, 3),
+    }))
+    .filter((section) => section.posts.length > 0)
+    .slice(0, 3);
 
-      <p>
-        <Link href="/blog" className="tap-target underline">
-          See all posts
-        </Link>
-      </p>
+  return (
+    <div className="home">
+      <LeadStory post={lead} />
+
+      {grid.length > 0 ? (
+        <section className="story-grid-section" aria-label="Recent stories">
+          <div className="story-grid">
+            {grid.map((post) => (
+              <PostCard key={post.slug} post={post} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {tagSections.map((section) => (
+        <section key={section.summary.slug} className="story-grid-section">
+          <h2 className="section-heading">More on {section.summary.tag}</h2>
+          <div className="story-grid">
+            {section.posts.map((post) => (
+              <PostCard key={post.slug} post={post} />
+            ))}
+          </div>
+        </section>
+      ))}
+
+      <AuthorBlock />
+
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(jsonLd) }} />
     </div>
   );

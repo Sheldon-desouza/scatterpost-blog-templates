@@ -13,10 +13,10 @@ export default async function TagsIndexPage() {
   const tags = collectTags(posts);
 
   return (
-    <div className="measure flex flex-col gap-6">
-      <h1 className="font-display text-3xl font-semibold">Tags</h1>
+    <div className="index-page">
+      <h1 className="index-page-heading">Tags</h1>
       {tags.length === 0 ? (
-        <p className="text-[var(--muted-foreground)]">No tags yet.</p>
+        <p className="story-card-dek">No tags yet.</p>
       ) : (
         <ul className="tag-list">
           {tags.map((summary) => (

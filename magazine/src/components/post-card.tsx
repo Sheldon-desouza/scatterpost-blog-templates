@@ -1,27 +1,26 @@
 import Link from "next/link";
 import type { StoredPost } from "../lib/scatterpost/content-store.ts";
+import { kickerFor } from "../lib/kicker.ts";
 import { Cover } from "./cover.tsx";
-import { TagChips } from "./tag-chips.tsx";
 
+/** One card in the 3-column recent-stories grid (or any other grid of
+ * stories): image, kicker, headline, short dek. Collapses to a single
+ * column on phones through `.story-grid` alone; nothing here is
+ * breakpoint-specific. */
 export function PostCard({ post }: { post: StoredPost }) {
+  const kicker = kickerFor(post);
+
   return (
-    <article className="card">
-      <Link href={`/blog/${post.slug}`} className="block" aria-label={post.title}>
-        <Cover title={post.title} cover={post.cover} />
+    <article className="story-card">
+      <Link href={`/blog/${post.slug}`} className="story-card-cover" aria-label={post.title}>
+        <Cover title={post.title} kicker={kicker} cover={post.cover} />
       </Link>
-      <div className="card-body">
-        <h2 className="text-xl font-semibold">
-          <Link href={`/blog/${post.slug}`} className="underline">
-            {post.title}
-          </Link>
-        </h2>
-        <p className="text-sm text-[var(--muted-foreground)]">
-          <time dateTime={post.date}>
-            {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
-          </time>
-        </p>
-        {post.description ? <p>{post.description}</p> : null}
-        <TagChips tags={post.tags} />
+      <div className="story-card-body">
+        <p className="kicker">{kicker}</p>
+        <h3 className="story-card-headline">
+          <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+        </h3>
+        {post.description ? <p className="story-card-dek">{post.description}</p> : null}
       </div>
     </article>
   );
