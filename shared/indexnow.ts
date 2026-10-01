@@ -45,7 +45,19 @@ export function pingIndexNow({ siteUrl, postUrl, fetchImpl = fetch }: PingIndexN
   const key = process.env.INDEXNOW_KEY;
   if (!isValidIndexNowKey(key)) return;
 
-  const payload = buildIndexNowPayload(siteUrl, key, postUrl);
+  // `buildIndexNowPayload` calls `new URL(siteUrl)`, which throws
+  // synchronously on a malformed `NEXT_PUBLIC_SITE_URL` (security
+  // re-review LOW-2): caught here, not left to the caller, so a bad
+  // site URL cannot throw out of a webhook or pull-mode publish that
+  // has already succeeded and mark it failed.
+  let payload: IndexNowPayload;
+  try {
+    payload = buildIndexNowPayload(siteUrl, key, postUrl);
+  } catch (cause) {
+    console.error("IndexNow ping skipped; could not build its payload.", cause);
+    return;
+  }
+
   fetchImpl("https://api.indexnow.org/indexnow", {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },

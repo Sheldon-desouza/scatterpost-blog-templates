@@ -91,7 +91,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         <h1 className="font-display text-3xl font-semibold">{post.title}</h1>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">
           By {authorUrl() ? (
-            <a href={authorUrl()} className="underline">
+            <a href={authorUrl()} rel="author" className="underline">
               {authorName()}
             </a>
           ) : (

@@ -72,3 +72,40 @@ export function subscribeToReopenRequest(callback: () => void): () => void {
   window.addEventListener(CONSENT_REOPEN_EVENT, callback);
   return () => window.removeEventListener(CONSENT_REOPEN_EVENT, callback);
 }
+
+/**
+ * On withdrawal (Decline, or reopening and declining again),
+ * `SiteAnalytics` sends `gtag('consent', 'update', ...)` to stop
+ * further collection, and also expires any `_ga` and `_ga_<container>`
+ * cookies GA already set, since the consent update alone does not
+ * remove them (security re-review MED-2). The pure helpers below pick
+ * out which cookies to expire and build the `Set-Cookie`-style strings
+ * for it; `expireGaCookies` (DOM-dependent, not unit tested here) does
+ * the actual `document.cookie` writes.
+ */
+export function gaCookieNamesIn(cookieHeader: string): string[] {
+  return cookieHeader
+    .split(";")
+    .map((part) => part.split("=")[0]?.trim())
+    .filter((name): name is string => !!name && (name === "_ga" || name.startsWith("_ga_")));
+}
+
+/**
+ * GA sets `_ga`/`_ga_*` on the leading-dot registrable domain so they
+ * survive subdomains; clearing only the exact host would leave those
+ * in place. A bare two-label split (not full public-suffix-list aware)
+ * is good enough here: getting it wrong just means the extra
+ * `Domain=` write targets a domain the browser won't match, which is
+ * harmless, not a `localhost` or a single-label host, which has no
+ * wider domain to clear.
+ */
+export function registrableDomainOf(hostname: string): string | null {
+  const parts = hostname.split(".");
+  if (parts.length < 2) return null;
+  return parts.slice(-2).join(".");
+}
+
+export function buildExpiredCookie(name: string, domain?: string): string {
+  const domainPart = domain ? `; Domain=${domain}` : "";
+  return `${name}=; Max-Age=0; Path=/${domainPart}`;
+}

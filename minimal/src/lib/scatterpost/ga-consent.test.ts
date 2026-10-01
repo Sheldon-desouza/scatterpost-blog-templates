@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildConsentCookie, isValidGaMeasurementId, readConsentCookie } from "./ga-consent.ts";
+import {
+  buildConsentCookie,
+  buildExpiredCookie,
+  gaCookieNamesIn,
+  isValidGaMeasurementId,
+  readConsentCookie,
+  registrableDomainOf,
+} from "./ga-consent.ts";
 
 describe("isValidGaMeasurementId", () => {
   it("accepts a well-formed GA4 measurement id", () => {
@@ -39,5 +46,39 @@ describe("buildConsentCookie", () => {
     expect(cookie).toContain("Max-Age=31536000");
     expect(cookie).toContain("Path=/");
     expect(cookie).toContain("SameSite=Lax");
+  });
+});
+
+describe("gaCookieNamesIn", () => {
+  it("picks out _ga and every _ga_<container> cookie, ignoring others", () => {
+    expect(gaCookieNamesIn("_ga=GA1.1.1; _ga_ABC123=GS1.1.1; blog_consent=granted; other=x")).toEqual([
+      "_ga",
+      "_ga_ABC123",
+    ]);
+  });
+
+  it("returns an empty list when there are no GA cookies", () => {
+    expect(gaCookieNamesIn("blog_consent=granted; other=x")).toEqual([]);
+  });
+});
+
+describe("registrableDomainOf", () => {
+  it("returns the last two labels for a normal host", () => {
+    expect(registrableDomainOf("www.example.com")).toBe("example.com");
+    expect(registrableDomainOf("example.com")).toBe("example.com");
+  });
+
+  it("returns null for a single-label host such as localhost", () => {
+    expect(registrableDomainOf("localhost")).toBeNull();
+  });
+});
+
+describe("buildExpiredCookie", () => {
+  it("expires a cookie on Path=/ with Max-Age=0", () => {
+    expect(buildExpiredCookie("_ga")).toBe("_ga=; Max-Age=0; Path=/");
+  });
+
+  it("includes a Domain when one is given", () => {
+    expect(buildExpiredCookie("_ga", ".example.com")).toBe("_ga=; Max-Age=0; Path=/; Domain=.example.com");
   });
 });

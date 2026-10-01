@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { sameAsUrls, webhookSecret } from "./site.ts";
+import { authorUrl, sameAsUrls, webhookSecret } from "./site.ts";
 
 describe("webhookSecret (security review L3)", () => {
   const original = process.env.SCATTERPOST_WEBHOOK_SECRET;
@@ -52,5 +52,37 @@ describe("sameAsUrls", () => {
   it("drops an entry that is not a valid https URL", () => {
     process.env.SAME_AS = "https://example.com/a, not-a-url, http://example.com/insecure";
     expect(sameAsUrls()).toEqual(["https://example.com/a"]);
+  });
+});
+
+describe("authorUrl (security re-review LOW-3)", () => {
+  const original = process.env.AUTHOR_URL;
+
+  afterEach(() => {
+    if (original === undefined) {
+      delete process.env.AUTHOR_URL;
+    } else {
+      process.env.AUTHOR_URL = original;
+    }
+  });
+
+  it("returns undefined when unset", () => {
+    delete process.env.AUTHOR_URL;
+    expect(authorUrl()).toBeUndefined();
+  });
+
+  it("returns a valid https URL", () => {
+    process.env.AUTHOR_URL = "https://example.com/author";
+    expect(authorUrl()).toBe("https://example.com/author");
+  });
+
+  it("drops an http:// URL", () => {
+    process.env.AUTHOR_URL = "http://example.com/author";
+    expect(authorUrl()).toBeUndefined();
+  });
+
+  it("drops a malformed value", () => {
+    process.env.AUTHOR_URL = "not-a-url";
+    expect(authorUrl()).toBeUndefined();
   });
 });

@@ -3,8 +3,11 @@
  * `https://<host>/<key>.txt` to prove ownership of the key sent with
  * every ping (see `src/lib/scatterpost/indexnow.ts`). Optional: when
  * `INDEXNOW_KEY` is unset or malformed, or the requested segment does
- * not match it exactly, this 404s rather than confirming or denying
- * which key (if any) is configured.
+ * not match it exactly, this calls `notFound()` (security re-review
+ * LOW-1) so a visitor who lands on, say, `/favicon.txt` gets the
+ * site's normal not-found page rather than a bare 404 body, and so
+ * the response neither confirms nor denies which key (if any) is
+ * configured.
  *
  * The whole single path segment, including its `.txt` suffix, is the
  * dynamic `key` param here (there is no separate `[key]/route.ts` and
@@ -13,6 +16,7 @@
  * a literal folder, which Next always matches before falling back to
  * this dynamic one.
  */
+import { notFound } from "next/navigation";
 import { isValidIndexNowKey } from "../../lib/scatterpost/indexnow.ts";
 
 interface RouteProps {
@@ -24,7 +28,7 @@ export async function GET(_request: Request, { params }: RouteProps): Promise<Re
   const indexNowKey = process.env.INDEXNOW_KEY;
 
   if (!isValidIndexNowKey(indexNowKey) || requestedSegment !== `${indexNowKey}.txt`) {
-    return new Response("Not found.", { status: 404 });
+    notFound();
   }
 
   return new Response(indexNowKey, { headers: { "Content-Type": "text/plain; charset=utf-8" } });

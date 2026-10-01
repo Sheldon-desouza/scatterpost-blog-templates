@@ -35,8 +35,23 @@ export function authorName(): string {
   return process.env.AUTHOR_NAME || siteName();
 }
 
+/**
+ * https-only, like `sameAsUrls` below (security re-review LOW-3): an
+ * `http://` or malformed `AUTHOR_URL` is dropped rather than reaching
+ * the JSON-LD or the post byline's link.
+ */
+function isHttpsUrl(value: string): boolean {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function authorUrl(): string | undefined {
-  return process.env.AUTHOR_URL || undefined;
+  const raw = process.env.AUTHOR_URL;
+  if (!raw) return undefined;
+  return isHttpsUrl(raw) ? raw : undefined;
 }
 
 /**
@@ -53,13 +68,7 @@ export function sameAsUrls(): string[] {
   return raw
     .split(",")
     .map((url) => url.trim())
-    .filter((url) => {
-      try {
-        return new URL(url).protocol === "https:";
-      } catch {
-        return false;
-      }
-    });
+    .filter((url) => isHttpsUrl(url));
 }
 
 /**

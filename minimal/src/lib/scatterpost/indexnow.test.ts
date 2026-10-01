@@ -73,4 +73,13 @@ describe("pingIndexNow", () => {
     // Let the rejected promise's .catch run before the test ends.
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
+
+  it("never throws synchronously, even with a malformed siteUrl (security re-review LOW-2)", () => {
+    process.env.INDEXNOW_KEY = "abcd1234efgh";
+    const fetchImpl = vi.fn();
+    expect(() =>
+      pingIndexNow({ siteUrl: "not a url", postUrl: "https://example.com/blog/hello", fetchImpl }),
+    ).not.toThrow();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
 });
