@@ -1,0 +1,12 @@
+{
+  "name": "scatterpost-blog-templates",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "MIT-licensed Next.js blog templates with the scatterpost website connector pre-wired.",
+  "scripts": {
+    "sync": "node scripts/sync-shared.mjs",
+    "check": "node scripts/sync-shared.mjs --check",
+    "verify": "node scripts/verify-templates.mjs"
+  }
+}
