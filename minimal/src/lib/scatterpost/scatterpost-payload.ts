@@ -51,6 +51,17 @@ export const ScatterpostPayloadSchema = z.object({
   canonicalUrl: httpUrl.optional(),
   tags: z.array(z.string()),
   coverImageUrl: optionalHttpUrl,
+  // Alt text for the cover image. Optional (a cover can still be purely
+  // decorative), trimmed, and capped at 300 characters: generous enough
+  // for a real description, short enough that a runaway value can't be
+  // used to bloat every page's markup. Rejected outright rather than
+  // truncated, so a caller finds out its alt text was too long instead
+  // of silently publishing a clipped one.
+  coverImageAlt: z
+    .string()
+    .trim()
+    .max(300, { message: "coverImageAlt must be 300 characters or fewer." })
+    .optional(),
   publishedAt: z.string(),
 });
 

@@ -20,6 +20,7 @@ interface FrontMatter {
   tags?: string[];
   canonical?: string;
   cover?: string;
+  coverAlt?: string;
   scatterpostId?: string;
 }
 
@@ -39,6 +40,7 @@ function toStoredPost(slugFromFilename: string, raw: string): StoredPost {
     tags: frontMatter.tags ?? [],
     canonical: orUndefined(frontMatter.canonical),
     cover: orUndefined(frontMatter.cover),
+    coverAlt: orUndefined(frontMatter.coverAlt),
     bodyMarkdown: content.trim(),
   };
 }
@@ -51,10 +53,11 @@ function toFileContents(post: StoredPost): string {
     description: post.description,
     tags: post.tags,
     scatterpostId: post.scatterpostId,
-    // `canonical` and `cover` are only added when present: gray-matter's
-    // YAML dumper throws on an explicit `undefined` value.
+    // `canonical`, `cover` and `coverAlt` are only added when present:
+    // gray-matter's YAML dumper throws on an explicit `undefined` value.
     ...(post.canonical ? { canonical: post.canonical } : {}),
     ...(post.cover ? { cover: post.cover } : {}),
+    ...(post.coverAlt ? { coverAlt: post.coverAlt } : {}),
   };
   return matter.stringify(post.bodyMarkdown, frontMatter);
 }

@@ -19,6 +19,12 @@ interface CoverProps {
   title: string;
   kicker: string;
   cover?: string;
+  /** Alt text for the cover image, from `coverImageAlt` on the
+   * scatterpost payload. When absent, the image stays decorative
+   * (`alt=""`): the title is already conveyed by the surrounding link's
+   * `aria-label` or `figcaption`, so an empty alt avoids announcing it
+   * twice. */
+  coverAlt?: string;
   /** Marks the image above the fold (the lead story) as eager and high
    * priority; every other card stays lazy. */
   priority?: boolean;
@@ -32,14 +38,14 @@ function isSafeHttpsUrl(url: string): boolean {
   }
 }
 
-export function Cover({ title, kicker, cover, priority = false }: CoverProps) {
+export function Cover({ title, kicker, cover, coverAlt, priority = false }: CoverProps) {
   if (cover && isSafeHttpsUrl(cover)) {
     return (
       <div className="cover-frame">
         {/* eslint-disable-next-line @next/next/no-img-element -- deliberate: see the file comment above. */}
         <img
           src={cover}
-          alt=""
+          alt={coverAlt ?? ""}
           width={1200}
           height={675}
           loading={priority ? "eager" : "lazy"}

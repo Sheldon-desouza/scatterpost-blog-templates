@@ -121,4 +121,14 @@ describe("BlobStore", () => {
     const store = new BlobStore();
     await expect(store.save(post({ slug: "" }))).rejects.toThrow(/invalid slug/);
   });
+
+  it("round trips a cover and its coverAlt", async () => {
+    objects.clear();
+    const store = new BlobStore();
+    await store.save(post({ cover: "https://example.com/cover.png", coverAlt: "A chart of launch day traffic." }));
+
+    const fetched = await store.get("hello-world");
+    expect(fetched?.cover).toBe("https://example.com/cover.png");
+    expect(fetched?.coverAlt).toBe("A chart of launch day traffic.");
+  });
 });

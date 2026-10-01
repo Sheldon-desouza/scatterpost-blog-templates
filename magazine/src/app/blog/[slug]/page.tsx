@@ -33,12 +33,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "article",
       publishedTime: post.date,
       tags: post.tags,
-      images: post.cover ? [post.cover] : undefined,
+      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
+      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
     },
   };
 }
@@ -125,7 +126,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         </p>
 
         <figure className="post-cover">
-          <Cover title={post.title} kicker={kicker} cover={post.cover} priority />
+          <Cover title={post.title} kicker={kicker} cover={post.cover} coverAlt={post.coverAlt} priority />
           <figcaption>{post.title}</figcaption>
         </figure>
 

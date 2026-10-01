@@ -30,12 +30,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "article",
       publishedTime: post.date,
       tags: post.tags,
-      images: post.cover ? [post.cover] : undefined,
+      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
+      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
     },
   };
 }
@@ -114,7 +115,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         {post.cover ? (
           <p className="entry-cover">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={post.cover} alt={post.title} width={1200} height={630} />
+            <img src={post.cover} alt={post.coverAlt ?? post.title} width={1200} height={630} />
           </p>
         ) : null}
         <div className="prose mt-10" dangerouslySetInnerHTML={{ __html: html }} />

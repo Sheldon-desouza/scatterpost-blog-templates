@@ -13,7 +13,7 @@ export function PostCard({ post }: { post: StoredPost }) {
   return (
     <article className="story-card">
       <Link href={`/blog/${post.slug}`} className="story-card-cover" aria-label={post.title}>
-        <Cover title={post.title} kicker={kicker} cover={post.cover} />
+        <Cover title={post.title} kicker={kicker} cover={post.cover} coverAlt={post.coverAlt} />
       </Link>
       <div className="story-card-body">
         <p className="kicker">{kicker}</p>

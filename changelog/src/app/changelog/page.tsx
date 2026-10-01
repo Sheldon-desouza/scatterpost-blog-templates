@@ -69,7 +69,7 @@ export default async function ChangelogIndexPage() {
                         {post.cover ? (
                           <p className="timeline-cover">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={post.cover} alt={post.title} width={800} height={450} />
+                            <img src={post.cover} alt={post.coverAlt ?? post.title} width={800} height={450} />
                           </p>
                         ) : null}
                         {hasLongBody ? (

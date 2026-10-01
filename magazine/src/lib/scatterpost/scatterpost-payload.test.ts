@@ -72,4 +72,24 @@ describe("ScatterpostPayloadSchema", () => {
     expect(result.success).toBe(true);
     expect(result.success && result.data.coverImageUrl).toBeUndefined();
   });
+
+  it("accepts an optional coverImageAlt, trimmed", () => {
+    const result = ScatterpostPayloadSchema.safeParse({
+      ...validPayload,
+      coverImageUrl: "https://example.com/cover.png",
+      coverImageAlt: "  A chart showing launch day traffic.  ",
+    });
+    expect(result.success).toBe(true);
+    expect(result.success && result.data.coverImageAlt).toBe("A chart showing launch day traffic.");
+  });
+
+  it("rejects a coverImageAlt over 300 characters", () => {
+    const result = ScatterpostPayloadSchema.safeParse({ ...validPayload, coverImageAlt: "a".repeat(301) });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts a coverImageAlt of exactly 300 characters", () => {
+    const result = ScatterpostPayloadSchema.safeParse({ ...validPayload, coverImageAlt: "a".repeat(300) });
+    expect(result.success).toBe(true);
+  });
 });
