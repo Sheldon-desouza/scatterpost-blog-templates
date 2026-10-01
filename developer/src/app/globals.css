@@ -138,9 +138,10 @@ a {
 
 .site-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem 1rem;
   padding: 1.75rem 0;
   border-bottom: 1px solid var(--border);
 }
@@ -152,8 +153,19 @@ a {
 
 .site-nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.75rem 1.25rem;
+}
+
+@media (max-width: 420px) {
+  .site-nav {
+    gap: 0.625rem 1rem;
+  }
+
+  .site-nav a {
+    font-size: 0.8125rem;
+  }
 }
 
 .site-nav a {
@@ -522,13 +534,14 @@ a {
 }
 
 /* Heading anchors are links: underline only on hover/focus, so a
-   heading does not read as a solid block of underlined text. */
-.heading-anchor {
+   heading does not read as a solid block of underlined text. Specific
+   enough to beat `.prose a`'s own underline below. */
+.prose a.heading-anchor {
   text-decoration: none;
 }
 
-.heading-anchor:hover,
-.heading-anchor:focus-visible {
+.prose a.heading-anchor:hover,
+.prose a.heading-anchor:focus-visible {
   text-decoration: underline;
 }
 
