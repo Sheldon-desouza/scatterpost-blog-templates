@@ -75,4 +75,10 @@ describe("renderPostHtml", () => {
     expect(html).toContain('class="line"');
     expect(html).not.toContain("evil-exfil");
   });
+
+  it("strips any class from a code tag, since Shiki never puts one there (security re-review L7)", async () => {
+    const { html } = await renderPostHtml('<code class="evil-exfil">x</code>');
+    expect(html).not.toContain("evil-exfil");
+    expect(html).not.toContain('<code class=');
+  });
 });

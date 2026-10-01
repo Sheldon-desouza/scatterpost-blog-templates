@@ -23,4 +23,9 @@ describe("renderMarkdown", () => {
     const html = renderMarkdown('<a href="https://example.com">Link</a>');
     expect(html).not.toContain("rel=");
   });
+
+  it("strips a class from a code tag, since this template has no highlighter to style (security review L7)", () => {
+    const html = renderMarkdown('<code class="evil">x</code>');
+    expect(html).not.toContain("class=");
+  });
 });

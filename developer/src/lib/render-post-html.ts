@@ -153,10 +153,17 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
     // in the Markdown (scatterpost's own render, or an agent's raw
     // HTML) cannot smuggle an arbitrary class through to the page's own
     // CSS (security review L7). Any other class token is dropped, the
-    // tag and its other attributes are kept.
+    // tag and its other attributes are kept. `code` is listed with no
+    // classes at all: Shiki's own output never puts one there (the
+    // highlighting lives on `pre` and `span`), and `code` still has
+    // `class` in `allowedAttributes` above for the sanitiser to
+    // recognise the tag, so leaving it out of `allowedClasses` would
+    // otherwise let any class value through unrestricted (security
+    // re-review L7).
     allowedClasses: {
       a: ["heading-anchor"],
       pre: ["shiki", "shiki-themes", "github-light", "github-dark"],
+      code: [],
       span: ["line"],
     },
     // A raw `<a target="_blank">` shares `window.opener` with this page

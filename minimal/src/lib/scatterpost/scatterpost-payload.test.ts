@@ -43,16 +43,33 @@ describe("ScatterpostPayloadSchema", () => {
     expect(ScatterpostPayloadSchema.safeParse({ ...validPayload, canonicalUrl: "not-a-url" }).success).toBe(false);
   });
 
-  it("rejects a javascript: or http: canonicalUrl or coverImageUrl (security review L5)", () => {
+  it("rejects a javascript: canonicalUrl (security review L5)", () => {
     expect(ScatterpostPayloadSchema.safeParse({ ...validPayload, canonicalUrl: "javascript:alert(1)" }).success).toBe(
       false,
     );
-    expect(
-      ScatterpostPayloadSchema.safeParse({ ...validPayload, canonicalUrl: "http://example.com/blog/ship-it" })
-        .success,
-    ).toBe(false);
-    expect(ScatterpostPayloadSchema.safeParse({ ...validPayload, coverImageUrl: "javascript:alert(1)" }).success).toBe(
-      false,
-    );
+  });
+
+  it("accepts an http: canonicalUrl so a site without https yet is not blocked from publishing (security re-review N2)", () => {
+    const result = ScatterpostPayloadSchema.safeParse({
+      ...validPayload,
+      canonicalUrl: "http://example.com/blog/ship-it",
+    });
+    expect(result.success).toBe(true);
+    expect(result.success && result.data.canonicalUrl).toBe("http://example.com/blog/ship-it");
+  });
+
+  it("accepts an http: coverImageUrl (security re-review N2)", () => {
+    const result = ScatterpostPayloadSchema.safeParse({
+      ...validPayload,
+      coverImageUrl: "http://example.com/cover.png",
+    });
+    expect(result.success).toBe(true);
+    expect(result.success && result.data.coverImageUrl).toBe("http://example.com/cover.png");
+  });
+
+  it("drops a javascript: coverImageUrl to undefined rather than failing the whole payload (security re-review N2)", () => {
+    const result = ScatterpostPayloadSchema.safeParse({ ...validPayload, coverImageUrl: "javascript:alert(1)" });
+    expect(result.success).toBe(true);
+    expect(result.success && result.data.coverImageUrl).toBeUndefined();
   });
 });

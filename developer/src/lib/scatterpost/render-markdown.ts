@@ -14,6 +14,12 @@ export function renderMarkdown(bodyMarkdown: string): string {
       img: ["src", "alt", "title"],
       a: ["href", "name", "target", "rel"],
     },
+    // No tag here ever needs a class (this template has no syntax
+    // highlighter to style), `code` included: an explicit empty list
+    // closes the gap where a tag with no `allowedClasses` entry but an
+    // allowed `class` attribute would otherwise let any class value
+    // through unrestricted (security review L7).
+    allowedClasses: {},
     // A raw `<a target="_blank">` in the Markdown (scatterpost's own
     // render, or an agent's raw HTML) opens a new tab that still shares
     // `window.opener` with this page unless `rel="noopener noreferrer"`

@@ -8,16 +8,39 @@
 import { z } from "zod";
 
 /**
- * `z.string().url()` alone accepts `javascript:alert(1)` and plain
- * `http:` (security review L5): both are valid URLs, and the first runs
- * as script wherever the field is rendered as a link, the second lets a
- * mixed-content or downgradable link travel as the canonical or the
- * cover image src. Every scatterpost URL is https-only.
+ * `z.string().url()` alone accepts `javascript:alert(1)` (security
+ * review L5): a valid URL by RFC, but one that runs as script wherever
+ * the field is rendered as a link or an image src. `http:` is a
+ * legitimate scheme too, though: scatterpost is canonical-first (the
+ * founder's own site is published before any cross-post, see
+ * CLAUDE.md), and plenty of real sites are plain http during local dev
+ * or before their own TLS is set up, so rejecting it here would block
+ * the whole publish rather than guard anything (security re-review N2).
+ * Only http and https ever reach a store or a page.
  */
-const httpsUrl = z
+export function isHttpUrl(value: string): boolean {
+  try {
+    const protocol = new URL(value).protocol;
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export const httpUrl = z.string().refine(isHttpUrl, { message: "Must be an http:// or https:// URL." });
+
+/**
+ * Same scheme rule as `httpUrl`, but for a field that is cosmetic
+ * (the cover image) rather than load-bearing (the canonical URL): a
+ * `javascript:` or `data:` value here is dropped to `undefined` instead
+ * of failing the whole payload, since scatterpost can still publish the
+ * post without a cover (security re-review N2).
+ */
+export const optionalHttpUrl = z
   .string()
-  .url()
-  .refine((value) => value.startsWith("https://"), { message: "Must be an https:// URL." });
+  .nullable()
+  .optional()
+  .transform((value) => (typeof value === "string" && isHttpUrl(value) ? value : undefined));
 
 export const ScatterpostPayloadSchema = z.object({
   id: z.string().min(1),
@@ -25,9 +48,9 @@ export const ScatterpostPayloadSchema = z.object({
   title: z.string().min(1),
   bodyMarkdown: z.string().min(1),
   bodyHtml: z.string().min(1).optional(),
-  canonicalUrl: httpsUrl.optional(),
+  canonicalUrl: httpUrl.optional(),
   tags: z.array(z.string()),
-  coverImageUrl: httpsUrl.optional(),
+  coverImageUrl: optionalHttpUrl,
   publishedAt: z.string(),
 });
 

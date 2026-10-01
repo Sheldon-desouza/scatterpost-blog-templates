@@ -214,4 +214,190 @@ describe("pullDuePublications", () => {
 
     expect(summary).toEqual({ checked: 0, published: 0, failed: 0, errors: [] });
   });
+
+  it("publishes an article whose own body_markdown is the server default empty string, using adapted_body instead (security re-review N1)", async () => {
+    const store = fakeStore();
+    const unadaptedArticle = { ...article, body_markdown: "" };
+    const adaptedPublication = { ...publication, adapted_body: "# Ship it\n\nAdapted content." };
+
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [adaptedPublication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        return jsonResponse(unadaptedArticle);
+      }
+      if (url.endsWith("/api/v1/publications/pub_1") && init?.method === "PATCH") {
+        return jsonResponse({ ...adaptedPublication, status: "published" });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary).toEqual({ checked: 1, published: 1, failed: 0, errors: [] });
+    expect(store.saved[0]?.bodyMarkdown).toBe("# Ship it\n\nAdapted content.");
+  });
+
+  it("fails a publication whose body is empty on both adapted_body and the article's body_markdown, rather than saving an empty post (security re-review N1)", async () => {
+    const store = fakeStore();
+    const emptyBodyArticle = { ...article, body_markdown: "" };
+
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [publication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        return jsonResponse(emptyBodyArticle);
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary.failed).toBe(1);
+    expect(summary.errors[0]).toMatch(/no body/);
+    expect(store.saved).toHaveLength(0);
+  });
+
+  it("accepts an http: canonical_url and drops a javascript: cover_image_url to undefined (security re-review N2)", async () => {
+    const store = fakeStore();
+    const articleWithUrls = {
+      ...article,
+      canonical_url: "http://founder.example.com/blog/ship-it",
+      cover_image_url: "javascript:alert(1)",
+    };
+
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [publication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        return jsonResponse(articleWithUrls);
+      }
+      if (url.endsWith("/api/v1/publications/pub_1") && init?.method === "PATCH") {
+        return jsonResponse({ ...publication, status: "published" });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary).toEqual({ checked: 1, published: 1, failed: 0, errors: [] });
+    expect(store.saved[0]?.canonical).toBe("http://founder.example.com/blog/ship-it");
+    expect(store.saved[0]?.cover).toBeUndefined();
+  });
+
+  it("fails an article whose canonical_url is a non-http(s) scheme, rather than publishing with it dropped (security re-review N2)", async () => {
+    const store = fakeStore();
+    const articleWithBadCanonical = { ...article, canonical_url: "javascript:alert(1)" };
+
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [publication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        return jsonResponse(articleWithBadCanonical);
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary.failed).toBe(1);
+    expect(summary.errors[0]).toMatch(/failed validation/);
+    expect(store.saved).toHaveLength(0);
+  });
+
+  it("follows next_cursor across pages until it comes back null", async () => {
+    const store = fakeStore();
+    const publicationFor = (n: number) => ({
+      ...publication,
+      id: `pub_${n}`,
+      article_id: `article_${n}`,
+      idempotency_key: `idem_${n}`,
+    });
+    const requestedUrls: string[] = [];
+
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      requestedUrls.push(url);
+      if (url.endsWith("due=true")) {
+        return jsonResponse({ data: [publicationFor(1)], next_cursor: "page-2" });
+      }
+      if (url.endsWith("due=true&cursor=page-2")) {
+        return jsonResponse({ data: [publicationFor(2)], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1") || url.endsWith("/api/v1/articles/article_2")) {
+        return jsonResponse({ ...article, id: url.split("/").pop() });
+      }
+      if (init?.method === "PATCH") {
+        return jsonResponse({ status: "published" });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary).toEqual({ checked: 2, published: 2, failed: 0, errors: [] });
+    expect(requestedUrls.some((url) => url.includes("cursor=page-2"))).toBe(true);
+  });
+
+  it("stops after MAX_PAGES even if the API keeps returning a next_cursor", async () => {
+    const store = fakeStore();
+    let page = 0;
+
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        return jsonResponse(article);
+      }
+      if (init?.method === "PATCH") {
+        return jsonResponse({ status: "published" });
+      }
+      // Every page offers one due publication and always claims there is
+      // another page, which would loop forever without a page cap.
+      page += 1;
+      return jsonResponse({ data: [publication], next_cursor: `page-${page + 1}` });
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(page).toBe(10);
+    expect(summary.checked).toBe(10);
+  });
 });
