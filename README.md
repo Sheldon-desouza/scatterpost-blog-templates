@@ -12,9 +12,9 @@ button and its own folder you can copy out on its own:
 | Template | Status | Description |
 |---|---|---|
 | [`minimal/`](./minimal) | Live | Single column, readable, serif, light and dark. |
-| `developer/` | Coming soon | Syntax highlighting, table of contents, dark-first. |
-| `magazine/` | Coming soon | Card grid home with cover images, tags and categories. |
-| `changelog/` | Coming soon | Blog plus a changelog timeline. |
+| [`developer/`](./developer) | Live | Syntax highlighting, table of contents, dark-first. |
+| [`magazine/`](./magazine) | Live | Card grid home with cover images, tags and categories. |
+| [`changelog/`](./changelog) | Live | Blog plus a changelog timeline. |
 
 ## Deploy
 
@@ -44,6 +44,9 @@ shared/             the scatterpost connector code once: signature verification,
 scripts/sync-shared.mjs   copies shared/ into <template>/src/lib/scatterpost/;
                           --check exits 1 if any copy has drifted
 minimal/            self-contained Next.js app; Vercel Root Directory = minimal
+developer/          self-contained Next.js app; Vercel Root Directory = developer
+magazine/           self-contained Next.js app; Vercel Root Directory = magazine
+changelog/          self-contained Next.js app; Vercel Root Directory = changelog
 ```
 
 Each template is self-contained: its own `package.json` and
