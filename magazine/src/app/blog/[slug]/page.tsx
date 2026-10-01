@@ -90,6 +90,15 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
         <h1 className="font-display text-3xl font-semibold">{post.title}</h1>
         <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          By {authorUrl() ? (
+            <a href={authorUrl()} rel="author" className="underline">
+              {authorName()}
+            </a>
+          ) : (
+            authorName()
+          )}
+        </p>
+        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
           <time dateTime={post.date}>
             {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
           </time>

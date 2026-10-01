@@ -35,8 +35,53 @@ export function authorName(): string {
   return process.env.AUTHOR_NAME || siteName();
 }
 
+/**
+ * https-only, like `sameAsUrls` below (security re-review LOW-3): an
+ * `http://` or malformed `AUTHOR_URL` is dropped rather than reaching
+ * the JSON-LD or the post byline's link.
+ */
+function isHttpsUrl(value: string): boolean {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function authorUrl(): string | undefined {
-  return process.env.AUTHOR_URL || undefined;
+  const raw = process.env.AUTHOR_URL;
+  if (!raw) return undefined;
+  return isHttpsUrl(raw) ? raw : undefined;
+}
+
+/**
+ * Comma-separated list of the author or organisation's other profiles
+ * (e.g. GitHub, LinkedIn, X), validated to https URLs only, fed into
+ * the home page's `Person`/`Organization` JSON-LD as `sameAs` so search
+ * engines and AI assistants can connect this site to those profiles. An
+ * entry that fails to parse as a URL, or is not https, is dropped
+ * rather than failing the whole list.
+ */
+export function sameAsUrls(): string[] {
+  const raw = process.env.SAME_AS;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((url) => url.trim())
+    .filter((url) => isHttpsUrl(url));
+}
+
+/**
+ * Search engine verification, read into `metadata.verification` by
+ * every template's `layout.tsx`. `undefined` when unset, so Next omits
+ * the meta tag entirely rather than rendering one with an empty value.
+ */
+export function googleSiteVerification(): string | undefined {
+  return process.env.GOOGLE_SITE_VERIFICATION || undefined;
+}
+
+export function bingSiteVerification(): string | undefined {
+  return process.env.BING_SITE_VERIFICATION || undefined;
 }
 
 /**

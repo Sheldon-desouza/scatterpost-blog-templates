@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getStore } from "../lib/site.ts";
-import { authorName, authorUrl, siteName, siteUrl } from "../lib/site.ts";
+import { authorName, authorUrl, sameAsUrls, siteName, siteUrl } from "../lib/site.ts";
 import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
 import { Cover } from "../components/cover.tsx";
 import { TagChips } from "../components/tag-chips.tsx";
@@ -12,9 +12,10 @@ export default async function HomePage() {
   const grid = rest.slice(0, 8);
   const site = siteUrl();
 
+  const sameAs = sameAsUrls();
   const author = authorUrl()
-    ? { "@type": "Person", name: authorName(), url: authorUrl() }
-    : { "@type": "Organization", name: authorName() };
+    ? { "@type": "Person", name: authorName(), url: authorUrl(), sameAs: sameAs.length > 0 ? sameAs : undefined }
+    : { "@type": "Organization", name: authorName(), sameAs: sameAs.length > 0 ? sameAs : undefined };
 
   const jsonLd = {
     "@context": "https://schema.org",

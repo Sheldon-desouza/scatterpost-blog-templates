@@ -7,9 +7,11 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { getStore } from "../../../../lib/site.ts";
+import { after } from "next/server";
+import { getStore, siteUrl } from "../../../../lib/site.ts";
 import { pullDuePublications } from "../../../../lib/scatterpost/pull.ts";
 import { withPullUrlBuilder } from "../../../../lib/changelog.ts";
+import { pingIndexNow } from "../../../../lib/scatterpost/indexnow.ts";
 
 function hasValidCronSecret(request: Request): boolean {
   const header = request.headers.get("authorization") ?? "";
@@ -43,6 +45,11 @@ export async function GET(request: Request): Promise<Response> {
     apiKey,
     store,
     buildUrl,
+    // Scheduled with `after` so it runs once this response has been
+    // sent (security re-review LOW-2); fire-and-forget and never
+    // throws synchronously either way (see indexnow.ts), so it can
+    // never mark a published post as failed.
+    onPublished: (url) => after(() => pingIndexNow({ siteUrl: siteUrl(), postUrl: url })),
   });
 
   if (summary.published > 0) {

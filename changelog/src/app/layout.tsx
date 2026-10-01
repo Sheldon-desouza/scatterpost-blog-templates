@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
-import { siteDescription, siteName, siteUrl } from "../lib/site.ts";
+import { bingSiteVerification, googleSiteVerification, siteDescription, siteName, siteUrl } from "../lib/site.ts";
+import { ConsentBanner, CookieSettingsLink } from "../components/consent-banner.tsx";
+import { SiteAnalytics } from "../components/site-analytics.tsx";
 
 /**
  * Sora: a crisp, geometric grotesk built for product UI, with tall
@@ -28,6 +30,10 @@ export const metadata: Metadata = {
         { url: "/changelog/feed.xml", title: `${siteName()} - changelog` },
       ],
     },
+  },
+  verification: {
+    google: googleSiteVerification(),
+    other: bingSiteVerification() ? { "msvalidate.01": bingSiteVerification()! } : undefined,
   },
 };
 
@@ -61,10 +67,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="https://scatterpost.io" className="underline">
                 scatterpost
               </a>
-              .
+              . <CookieSettingsLink />
             </p>
           </footer>
         </div>
+        <ConsentBanner />
+        <SiteAnalytics />
       </body>
     </html>
   );
