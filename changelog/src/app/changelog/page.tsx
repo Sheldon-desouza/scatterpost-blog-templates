@@ -5,7 +5,7 @@ import { groupByMonth, parseCategory, parseVersion, splitPosts } from "../../lib
 
 export const metadata: Metadata = {
   title: "Changelog",
-  alternates: { canonical: "/changelog" },
+  alternates: { canonical: "changelog" },
 };
 
 const CATEGORY_LABEL = { new: "New", improved: "Improved", fixed: "Fixed" } as const;

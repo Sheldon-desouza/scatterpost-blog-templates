@@ -5,7 +5,7 @@ import { splitPosts } from "../../lib/changelog.ts";
 
 export const metadata: Metadata = {
   title: "Blog",
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "blog" },
 };
 
 function formatDate(date: string): string {

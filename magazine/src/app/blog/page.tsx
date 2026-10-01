@@ -4,7 +4,7 @@ import { PostCard } from "../../components/post-card.tsx";
 
 export const metadata: Metadata = {
   title: "Writing",
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "blog" },
 };
 
 export default async function BlogIndexPage() {

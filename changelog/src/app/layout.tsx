@@ -29,14 +29,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl()),
+  metadataBase: new URL(`${siteUrl()}/`),
   title: { default: siteName(), template: `%s | ${siteName()}` },
   description: siteDescription(),
   alternates: {
     types: {
       "application/rss+xml": [
-        { url: "/feed.xml", title: `${siteName()} - all updates` },
-        { url: "/changelog/feed.xml", title: `${siteName()} - changelog` },
+        { url: "feed.xml", title: `${siteName()} - all updates` },
+        { url: "changelog/feed.xml", title: `${siteName()} - changelog` },
       ],
     },
   },

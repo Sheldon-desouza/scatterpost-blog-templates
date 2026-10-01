@@ -5,7 +5,7 @@ import { tagCounts } from "../../components/post-index.tsx";
 
 export const metadata: Metadata = {
   title: "Tags",
-  alternates: { canonical: "/tags" },
+  alternates: { canonical: "tags" },
 };
 
 export default async function TagsIndexPage() {

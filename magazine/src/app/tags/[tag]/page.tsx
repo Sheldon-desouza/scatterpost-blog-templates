@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const name = tagNameForSlug(posts, tag);
   return {
     title: `Posts tagged "${name}"`,
-    alternates: { canonical: `/tags/${tag}` },
+    alternates: { canonical: `tags/${tag}` },
   };
 }
 

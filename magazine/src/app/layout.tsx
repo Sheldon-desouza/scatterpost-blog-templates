@@ -39,11 +39,11 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl()),
+  metadataBase: new URL(`${siteUrl()}/`),
   title: { default: siteName(), template: `%s | ${siteName()}` },
   description: `${siteName()}, a blog by ${authorName()}, published with scatterpost.`,
   alternates: {
-    types: { "application/rss+xml": [{ url: "/feed.xml", title: siteName() }] },
+    types: { "application/rss+xml": [{ url: "feed.xml", title: siteName() }] },
   },
   verification: {
     google: googleSiteVerification(),

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { authorUrl, sameAsUrls, webhookSecret } from "./site.ts";
+import { authorUrl, postUrl, sameAsUrls, siteUrl, webhookSecret } from "./site.ts";
 
 describe("webhookSecret (security review L3)", () => {
   const original = process.env.SCATTERPOST_WEBHOOK_SECRET;
@@ -84,5 +84,33 @@ describe("authorUrl (security re-review LOW-3)", () => {
   it("drops a malformed value", () => {
     process.env.AUTHOR_URL = "not-a-url";
     expect(authorUrl()).toBeUndefined();
+  });
+});
+
+
+describe("siteUrl and postUrl with a demo-mode base path", () => {
+  const original = process.env.NEXT_PUBLIC_SITE_URL;
+
+  afterEach(() => {
+    if (original === undefined) {
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+    } else {
+      process.env.NEXT_PUBLIC_SITE_URL = original;
+    }
+  });
+
+  it("keeps a base path baked into NEXT_PUBLIC_SITE_URL", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://demo.scatterpost.io/minimal";
+    expect(siteUrl()).toBe("https://demo.scatterpost.io/minimal");
+  });
+
+  it("carries the base path through into postUrl", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://demo.scatterpost.io/minimal";
+    expect(postUrl("hello-world")).toBe("https://demo.scatterpost.io/minimal/blog/hello-world");
+  });
+
+  it("strips a trailing slash from a base-path site URL", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://demo.scatterpost.io/minimal/";
+    expect(siteUrl()).toBe("https://demo.scatterpost.io/minimal");
   });
 });

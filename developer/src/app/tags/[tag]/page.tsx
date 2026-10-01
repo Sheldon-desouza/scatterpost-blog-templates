@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!match) return {};
   return {
     title: `Posts tagged "${match.tag}"`,
-    alternates: { canonical: `/tags/${tag}` },
+    alternates: { canonical: `tags/${tag}` },
   };
 }
 
