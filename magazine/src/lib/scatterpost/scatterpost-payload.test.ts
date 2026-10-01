@@ -42,4 +42,17 @@ describe("ScatterpostPayloadSchema", () => {
   it("rejects a non-url canonicalUrl", () => {
     expect(ScatterpostPayloadSchema.safeParse({ ...validPayload, canonicalUrl: "not-a-url" }).success).toBe(false);
   });
+
+  it("rejects a javascript: or http: canonicalUrl or coverImageUrl (security review L5)", () => {
+    expect(ScatterpostPayloadSchema.safeParse({ ...validPayload, canonicalUrl: "javascript:alert(1)" }).success).toBe(
+      false,
+    );
+    expect(
+      ScatterpostPayloadSchema.safeParse({ ...validPayload, canonicalUrl: "http://example.com/blog/ship-it" })
+        .success,
+    ).toBe(false);
+    expect(ScatterpostPayloadSchema.safeParse({ ...validPayload, coverImageUrl: "javascript:alert(1)" }).success).toBe(
+      false,
+    );
+  });
 });

@@ -115,7 +115,15 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
 
   for (const [id, { code, lang }] of codeBlocks) {
     const highlighted = await highlight(code, lang);
-    rendered = rendered.replace(`<div data-code-placeholder="${id}"></div>`, highlighted);
+    // A plain string second argument to `String.replace` treats `$&`,
+    // `$1`, `` $` `` etc. in it as replacement patterns, not literal
+    // text (security review L1): a code block whose highlighted output
+    // happens to contain one of those sequences (nothing stops a code
+    // sample from containing the literal text "$&") would corrupt the
+    // rendered HTML around it. A replacer function's return value is
+    // always used verbatim.
+    const placeholder = `<div data-code-placeholder="${id}"></div>`;
+    rendered = rendered.replace(placeholder, () => highlighted);
   }
 
   const html = sanitizeHtml(rendered, {
@@ -139,6 +147,26 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
         "--shiki-dark-bg": [/^#[0-9a-fA-F]{3,8}$/],
         "--shiki-light-bg": [/^#[0-9a-fA-F]{3,8}$/],
       },
+    },
+    // Restricted to the exact classes this renderer and Shiki ever put
+    // on these tags: a raw `<pre class="...">` or `<span class="...">`
+    // in the Markdown (scatterpost's own render, or an agent's raw
+    // HTML) cannot smuggle an arbitrary class through to the page's own
+    // CSS (security review L7). Any other class token is dropped, the
+    // tag and its other attributes are kept.
+    allowedClasses: {
+      a: ["heading-anchor"],
+      pre: ["shiki", "shiki-themes", "github-light", "github-dark"],
+      span: ["line"],
+    },
+    // A raw `<a target="_blank">` shares `window.opener` with this page
+    // unless `rel="noopener noreferrer"` is present; forced here rather
+    // than merely allowed (security review L7).
+    transformTags: {
+      a: (tagName, attribs) => ({
+        tagName,
+        attribs: attribs.target ? { ...attribs, rel: "noopener noreferrer" } : attribs,
+      }),
     },
   });
 

@@ -42,10 +42,22 @@ See `.env.example` for the full list with comments. In short:
 | `BLOB_READ_WRITE_TOKEN` | `CONTENT_STORE=blob` | Set automatically when a Blob store is connected to the project. |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | `CONTENT_STORE=supabase` only | Run `supabase/posts.sql` once against that project first. |
 
-If you are only using push mode, you can remove the `crons` block from
-`vercel.json`; it is harmless left in (the route just returns a 500 until
-`SCATTERPOST_API_URL`/`SCATTERPOST_API_KEY` are set), but it is one fewer
-thing to explain.
+`vercel.json` ships with no `crons` block, so the default (push mode)
+deploys cleanly on every Vercel plan, including Hobby. Pull mode needs
+one:
+
+- On a Pro plan or above, add to `vercel.json`:
+  ```json
+  "crons": [{ "path": "/api/scatterpost/pull", "schedule": "*/10 * * * *" }]
+  ```
+- On the Hobby plan, Vercel only allows a daily cron, so use once a day
+  instead, e.g.:
+  ```json
+  "crons": [{ "path": "/api/scatterpost/pull", "schedule": "0 6 * * *" }]
+  ```
+  or run `npm run pull` (`scripts/pull.mjs`) yourself on whatever
+  schedule you like (a GitHub Actions cron, for instance) instead of a
+  Vercel cron at all.
 
 ## Connecting this site as a Website channel
 
@@ -73,9 +85,10 @@ Pull mode (this site polls scatterpost instead of receiving a webhook):
    `SCATTERPOST_API_URL`, `SCATTERPOST_API_KEY` and `CRON_SECRET`.
 2. In scatterpost, add a channel with `platform: "website"` and
    `"mode": "pull"`.
-3. Either let `vercel.json`'s cron call `/api/scatterpost/pull` every ten
-   minutes, or run `npm run pull` (`scripts/pull.mjs`) yourself on a
-   schedule of your own.
+3. Add a `crons` entry calling `/api/scatterpost/pull` to `vercel.json`
+   (see "Environment variables" above for the Hobby-vs-Pro schedule), or
+   run `npm run pull` (`scripts/pull.mjs`) yourself on a schedule of your
+   own.
 
 ## How the canonical flows
 

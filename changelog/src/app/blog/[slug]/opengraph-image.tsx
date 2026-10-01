@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getStore, siteName } from "../../../lib/site.ts";
+import { isValidSlug } from "../../../lib/scatterpost/safe-html.ts";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -15,7 +16,9 @@ interface ImageProps {
  */
 export default async function OpengraphImage({ params }: ImageProps) {
   const { slug } = await params;
-  const post = await getStore().get(slug);
+  // Matches the page's own `isValidSlug` guard (security review L6): an
+  // invalid slug never even reaches the store.
+  const post = isValidSlug(slug) ? await getStore().get(slug) : null;
   const title = post?.title ?? siteName();
 
   return new ImageResponse(

@@ -102,4 +102,23 @@ describe("BlobStore", () => {
     const store = new BlobStore();
     expect(await store.get("../../secret")).toBeNull();
   });
+
+  it("never evaluates a gray-matter ---js front matter block (security review L9)", async () => {
+    objects.clear();
+    const pwnedMarker = "__scatterpost_blog_templates_l9_test_pwned__";
+    delete (globalThis as Record<string, unknown>)[pwnedMarker];
+    objects.set("posts/evil.md", `---js\nglobalThis.${pwnedMarker} = true\n---\nBody text.\n`);
+
+    const store = new BlobStore();
+    const fetched = await store.get("evil");
+
+    expect(fetched).toBeNull();
+    expect((globalThis as Record<string, unknown>)[pwnedMarker]).toBeUndefined();
+  });
+
+  it("rejects an empty or invalid slug before writing (security review M1)", async () => {
+    objects.clear();
+    const store = new BlobStore();
+    await expect(store.save(post({ slug: "" }))).rejects.toThrow(/invalid slug/);
+  });
 });

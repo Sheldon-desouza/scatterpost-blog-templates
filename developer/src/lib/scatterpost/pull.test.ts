@@ -109,6 +109,97 @@ describe("pullDuePublications", () => {
     expect(store.saved).toHaveLength(0);
   });
 
+  it("counts a malformed article response as a failure rather than saving it (security review L2)", async () => {
+    const store = fakeStore();
+    const fetchImpl = vi.fn(async (url: string) => {
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [publication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        // Missing `body_markdown` and the wrong type for `tags`: a
+        // response shape scatterpost should never send, but one this
+        // client must not trust blindly either.
+        return jsonResponse({ id: "article_1", title: "Ship it", tags: "launch" });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary.failed).toBe(1);
+    expect(summary.errors[0]).toMatch(/failed validation/);
+    expect(store.saved).toHaveLength(0);
+  });
+
+  it("encodes an article or publication id that would otherwise add a URL path segment (security review L2)", async () => {
+    const store = fakeStore();
+    const trickyPublication = { ...publication, id: "pub/evil", article_id: "article/evil" };
+    const trickyArticle = { ...article, id: "article/evil" };
+    const requestedPaths: string[] = [];
+
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      requestedPaths.push(url);
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [trickyPublication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article%2Fevil")) {
+        return jsonResponse(trickyArticle);
+      }
+      if (url.endsWith("/api/v1/publications/pub%2Fevil") && init?.method === "PATCH") {
+        return jsonResponse({ ...trickyPublication, status: "published" });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary).toEqual({ checked: 1, published: 1, failed: 0, errors: [] });
+    expect(requestedPaths.some((url) => url.includes("article%2Fevil"))).toBe(true);
+    expect(requestedPaths.some((url) => url.includes("/articles/article/evil"))).toBe(false);
+  });
+
+  it("falls back to a post-<id> slug when the title has no ASCII letters or digits (security review M1)", async () => {
+    const store = fakeStore();
+    const emojiPublication = { ...publication, idempotency_key: "idem-emoji-1-extra" };
+    const emojiArticle = { ...article, title: "\u{1F680}\u{1F389}" };
+
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [emojiPublication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        return jsonResponse(emojiArticle);
+      }
+      if (url.endsWith("/api/v1/publications/pub_1") && init?.method === "PATCH") {
+        return jsonResponse({ ...emojiPublication, status: "published" });
+      }
+      throw new Error(`Unexpected fetch: ${url}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+    });
+
+    expect(summary.published).toBe(1);
+    expect(store.saved[0]?.slug).toBe("post-idem-emoji-1");
+  });
+
   it("does nothing when there are no due publications", async () => {
     const store = fakeStore();
     const fetchImpl = vi.fn(async () => jsonResponse({ data: [], next_cursor: null }));

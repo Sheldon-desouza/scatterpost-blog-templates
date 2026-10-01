@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 import { getStore, webhookSecret } from "../../../lib/site.ts";
 import { verifySignature } from "../../../lib/scatterpost/verify-signature.ts";
 import { ScatterpostPayloadSchema } from "../../../lib/scatterpost/scatterpost-payload.ts";
-import { slugify } from "../../../lib/scatterpost/slugify.ts";
+import { slugifyWithFallback } from "../../../lib/scatterpost/slugify.ts";
 import { isChangelogPost, urlForPost } from "../../../lib/changelog.ts";
 
 function revalidateEverywhereAPostCanAppear(slug: string, isChangelog: boolean): void {
@@ -36,10 +36,12 @@ export async function POST(request: Request): Promise<Response> {
   try {
     secret = webhookSecret();
   } catch (cause) {
-    return Response.json(
-      { error: cause instanceof Error ? cause.message : "Server misconfigured." },
-      { status: 500 },
-    );
+    // The real cause (e.g. "SCATTERPOST_WEBHOOK_SECRET is not set") is
+    // server configuration detail, not something a caller needs or
+    // should see; logged here, a generic message is returned instead
+    // (security review L4).
+    console.error("POST /api/scatterpost: server misconfigured.", cause);
+    return Response.json({ error: "Server misconfigured." }, { status: 500 });
   }
 
   if (!verifySignature(secret, signatureHeader, rawBody)) {
@@ -61,8 +63,8 @@ export async function POST(request: Request): Promise<Response> {
 
   const store = getStore();
   const { slug } = await store.save({
-    slug: slugify(payload.title),
-    scatterpostId: payload.id,
+    slug: slugifyWithFallback(payload.title, payload.idempotencyKey),
+    scatterpostId: payload.idempotencyKey,
     title: payload.title,
     date: payload.publishedAt,
     description: "",

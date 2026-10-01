@@ -10,6 +10,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
 import { resolveSlugAndWrite, type ContentStore, type SaveResult, type StoredPost } from "./content-store.ts";
+import { safeMatterOptions } from "./matter-options.ts";
 
 interface FrontMatter {
   title: string;
@@ -27,7 +28,7 @@ function orUndefined(value: string | undefined): string | undefined {
 }
 
 function toStoredPost(slugFromFilename: string, raw: string): StoredPost {
-  const { data, content } = matter(raw);
+  const { data, content } = matter(raw, safeMatterOptions);
   const frontMatter = data as Partial<FrontMatter>;
   return {
     slug: frontMatter.slug ?? slugFromFilename,

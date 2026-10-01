@@ -5,6 +5,8 @@
  * with a colliding slug is an update of the same post or a genuine
  * collision with a different one.
  */
+import { isValidSlug } from "./safe-html.ts";
+
 export interface StoredPost {
   slug: string;
   scatterpostId: string;
@@ -68,6 +70,14 @@ export async function resolveSlugAndWrite(
   getExisting: (slug: string) => Promise<StoredPost | null>,
   write: (slug: string, post: StoredPost) => Promise<void>,
 ): Promise<SaveResult> {
+  // Defence in depth against security review M1: whatever built `post`
+  // should already have fallen back off an empty or unsafe slug (see
+  // `slugifyWithFallback`), but a store never writes a slug that fails
+  // the same check a route uses to read one back.
+  if (!isValidSlug(post.slug)) {
+    throw new Error(`Refusing to save a post with an invalid slug: ${JSON.stringify(post.slug)}.`);
+  }
+
   for (const candidate of slugCandidates(post.slug)) {
     const existing = await getExisting(candidate);
     if (!existing || existing.scatterpostId === post.scatterpostId) {

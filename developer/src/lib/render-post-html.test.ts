@@ -56,4 +56,23 @@ describe("renderPostHtml", () => {
     const { html } = await renderPostHtml("## Hello <script>alert(1)</script>");
     expect(html).not.toContain("<script>");
   });
+
+  it("does not corrupt the output when the highlighted code contains a $& replacement pattern (security review L1)", async () => {
+    const { html } = await renderPostHtml(["```js", "const price = '$& off';", "```"].join("\n"));
+
+    expect(html).toContain("$&amp;");
+    expect(html).not.toContain("<div data-code-placeholder=");
+  });
+
+  it("forces rel=\"noopener noreferrer\" onto a link that opens a new tab, even one that already carries a different rel (security review L7)", async () => {
+    const { html } = await renderPostHtml('<a href="https://example.com" target="_blank" rel="opener">Link</a>');
+    expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).not.toContain('rel="opener"');
+  });
+
+  it("strips a class the renderer and Shiki never produce (security review L7)", async () => {
+    const { html } = await renderPostHtml('<span class="line evil-exfil">text</span>');
+    expect(html).toContain('class="line"');
+    expect(html).not.toContain("evil-exfil");
+  });
 });

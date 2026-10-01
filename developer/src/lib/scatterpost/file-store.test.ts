@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -81,5 +81,25 @@ describe("FileStore", () => {
 
     const { slug } = await store.save(post({ scatterpostId: "post_3" }));
     expect(slug).toBe("hello-world-3");
+  });
+
+  it("never evaluates a gray-matter ---js front matter block (security review L9)", async () => {
+    const pwnedMarker = "__scatterpost_blog_templates_l9_test_pwned__";
+    delete (globalThis as Record<string, unknown>)[pwnedMarker];
+
+    await writeFile(
+      path.join(dir, "evil.md"),
+      `---js\nglobalThis.${pwnedMarker} = true\n---\nBody text.\n`,
+      "utf8",
+    );
+
+    const fetched = await store.get("evil");
+
+    expect(fetched).toBeNull();
+    expect((globalThis as Record<string, unknown>)[pwnedMarker]).toBeUndefined();
+  });
+
+  it("rejects an empty or invalid slug before writing (security review M1)", async () => {
+    await expect(store.save(post({ slug: "" }))).rejects.toThrow(/invalid slug/);
   });
 });

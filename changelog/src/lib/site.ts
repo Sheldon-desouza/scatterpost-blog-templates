@@ -81,5 +81,11 @@ export function webhookSecret(): string {
   if (!secret) {
     throw new Error("SCATTERPOST_WEBHOOK_SECRET is not set. See .env.example.");
   }
+  // A short secret is brute-forceable against the HMAC in
+  // verify-signature.ts (security review L3); 32 characters matches
+  // what .env.example documents and what scatterpost itself generates.
+  if (secret.length < 32) {
+    throw new Error("SCATTERPOST_WEBHOOK_SECRET must be at least 32 characters. See .env.example.");
+  }
   return secret;
 }

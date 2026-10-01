@@ -14,5 +14,17 @@ export function renderMarkdown(bodyMarkdown: string): string {
       img: ["src", "alt", "title"],
       a: ["href", "name", "target", "rel"],
     },
+    // A raw `<a target="_blank">` in the Markdown (scatterpost's own
+    // render, or an agent's raw HTML) opens a new tab that still shares
+    // `window.opener` with this page unless `rel="noopener noreferrer"`
+    // is present; forced here rather than merely allowed, so a missing
+    // or wrong `rel` on the source link can never slip through
+    // (security review L7).
+    transformTags: {
+      a: (tagName, attribs) => ({
+        tagName,
+        attribs: attribs.target ? { ...attribs, rel: "noopener noreferrer" } : attribs,
+      }),
+    },
   });
 }
