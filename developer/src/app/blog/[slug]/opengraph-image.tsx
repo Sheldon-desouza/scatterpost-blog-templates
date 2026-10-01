@@ -10,9 +10,11 @@ interface ImageProps {
 }
 
 /**
- * A plain text card on a dark background, to match this template's
- * dark-first theme: the post title, with the site name underneath. No
- * photography, no gradient, no emoji, so it reads cleanly at any size.
+ * A plain text card on a dark surface: a mono kicker (date, then the
+ * site name), the post title in the UI face. No photography, no
+ * gradient, no emoji, so it reads cleanly at any size. Always this
+ * dark palette (the platforms that embed this image don't honour a
+ * reader's light/dark choice).
  */
 export default async function OpengraphImage({ params }: ImageProps) {
   const { slug } = await params;
@@ -20,6 +22,10 @@ export default async function OpengraphImage({ params }: ImageProps) {
   // invalid slug never even reaches the store.
   const post = isValidSlug(slug) ? await getStore().get(slug) : null;
   const title = post?.title ?? siteName();
+  const date = post?.date
+    ? new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })
+    : undefined;
+  const mono = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
   return new ImageResponse(
     (
@@ -29,14 +35,17 @@ export default async function OpengraphImage({ params }: ImageProps) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: "space-between",
           padding: "80px",
-          background: "#0b0c0e",
-          color: "#e6e8eb",
+          background: "#12161b",
+          color: "#e6eaf0",
         }}
       >
+        <div style={{ fontFamily: mono, fontSize: 24, color: "#4fd1a5", letterSpacing: "0.02em" }}>
+          {date ?? siteName()}
+        </div>
         <div style={{ fontSize: 56, fontWeight: 600, lineHeight: 1.3 }}>{title}</div>
-        <div style={{ marginTop: 40, fontSize: 28, color: "#7fd0ff" }}>{siteName()}</div>
+        <div style={{ fontFamily: mono, fontSize: 24, color: "#9aa4b2" }}>{siteName()}</div>
       </div>
     ),
     { ...size },

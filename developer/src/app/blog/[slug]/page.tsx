@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { authorName, authorUrl, getStore, postUrl, siteName, siteUrl } from "../../../lib/site.ts";
@@ -38,6 +39,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+}
+
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
   // `..`, `/`, `%2F` and anything else outside the slug shape never reach
@@ -46,10 +51,16 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!isValidSlug(slug)) {
     notFound();
   }
-  const post = await getStore().get(slug);
+  const posts = await getStore().list();
+  const index = posts.findIndex((candidate) => candidate.slug === slug);
+  const post = index === -1 ? await getStore().get(slug) : posts[index];
   if (!post) {
     notFound();
   }
+  // Newest first: the next item in the array is older (prev), the
+  // previous item is newer (next).
+  const previousPost = index > -1 ? posts[index + 1] : undefined;
+  const nextPost = index > 0 ? posts[index - 1] : undefined;
 
   const canonical = post.canonical ?? postUrl(post.slug);
   const { html, toc } = await renderPostHtml(post.bodyMarkdown);
@@ -86,25 +97,61 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <div className="post-layout">
-      <article className="measure flex flex-col gap-4">
-        <h1 className="text-3xl font-semibold">{post.title}</h1>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          By {authorUrl() ? (
-            <a href={authorUrl()} rel="author" className="underline">
+      <article className="measure">
+        <p className="post-kicker">
+          <time dateTime={post.date}>{formatDate(post.date)}</time>
+          <span aria-hidden="true">&middot;</span>
+          <span>{minutes} min read</span>
+          {post.tags.map((tag) => (
+            <span key={tag} className="tag-chip">
+              {tag}
+            </span>
+          ))}
+        </p>
+        <h1 className="post-h1">{post.title}</h1>
+        <p className="post-byline">
+          By{" "}
+          {authorUrl() ? (
+            <a href={authorUrl()} rel="author">
               {authorName()}
             </a>
           ) : (
             authorName()
           )}
         </p>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          <time dateTime={post.date}>
-            {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
-          </time>
-          {" · "}
-          {minutes} min read
-        </p>
+        {post.description ? <p className="post-dek">{post.description}</p> : null}
+        {post.cover ? (
+          <p className="post-cover">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={post.cover} alt={post.title} width={1200} height={630} />
+          </p>
+        ) : null}
         <div className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
+
+        {previousPost || nextPost ? (
+          <nav className="post-footer-nav" aria-label="More posts">
+            {previousPost ? (
+              <Link href={`/blog/${previousPost.slug}`} className="prev">
+                <span className="label">Previous</span>
+                <span className="title">{previousPost.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {nextPost ? (
+              <Link href={`/blog/${nextPost.slug}`} className="next">
+                <span className="label">Next</span>
+                <span className="title">{nextPost.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        ) : null}
+
+        <p className="subscribe-line">
+          Subscribe over <Link href="/feed.xml">RSS</Link>.
+        </p>
       </article>
       {toc.length > 0 ? (
         <aside className="toc-sidebar">

@@ -1,11 +1,12 @@
 # Developer
 
-A dark-first Next.js blog for a dev-tool founder, built to connect
-straight to [scatterpost](https://scatterpost.io) as a Website channel.
-Syntax-highlighted code blocks with a copy button, a table of contents
-built from each post's headings, and a reading time estimate, on top
-of the same SEO and AI-search foundation every template here ships. It
-has no runtime dependency on any scatterpost package: the signature
+An engineering-notebook Next.js blog for a technical founder, built to
+connect straight to [scatterpost](https://scatterpost.io) as a Website
+channel. Syntax-highlighted code blocks with a filename-or-language tab
+and a copy button, a sticky table of contents on wide screens, tag
+pages, a system/light/dark theme toggle and a reading time estimate, on
+top of the same SEO and AI-search foundation every template here ships.
+It has no runtime dependency on any scatterpost package: the signature
 verification, payload validation and content stores it needs are
 self-contained under `src/lib/scatterpost/` (synced from this
 repository's `shared/` folder by `scripts/sync-shared.mjs`), so this
