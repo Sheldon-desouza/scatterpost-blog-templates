@@ -926,3 +926,35 @@ a {
     transition: none !important;
   }
 }
+
+/* Demo bar: only rendered when NEXT_PUBLIC_DEMO_TEMPLATE is set. Uses
+   the accent/accent-foreground pair already relied on for AA contrast
+   by .consent-button-accept above, in both light and dark palettes. */
+
+.demo-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 0.875rem;
+}
+
+.demo-bar-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.demo-bar a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.demo-bar a:hover {
+  opacity: 0.85;
+}
