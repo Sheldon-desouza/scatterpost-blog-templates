@@ -1,0 +1,276 @@
+:root {
+  --bg: #FFFFFF;
+  --surface: #F8FAFC;
+  --text: #0F172A;
+  --muted: #475569;
+  --border: #E2E8F0;
+  --accent: #D43C16;
+  --accent-text: #FFFFFF;
+  --focus: #0F172A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #090D14;
+    --surface: #111622;
+    --text: #F8FAFC;
+    --muted: #94A3B8;
+    --border: #1E2638;
+    --accent: #F05D38;
+    --accent-text: #090D14;
+    --focus: #F8FAFC;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-weight: 600;
+  margin: 0 0 0.5em;
+  color: var(--text);
+}
+
+.eyebrow,
+.wordmark {
+  font-family: "JetBrains Mono", monospace;
+}
+
+p {
+  margin: 0 0 1em;
+  color: var(--muted);
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent);
+  color: var(--accent-text);
+  padding: 0.75em 1em;
+  z-index: 100;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.skip-link:focus {
+  left: 1em;
+  top: 1em;
+}
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 1.25rem 0;
+}
+
+.site-header .wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.wordmark {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.site-header .eyebrow {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hero {
+  padding: 3rem 0 2rem;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+}
+
+.lede {
+  max-width: 48ch;
+  font-size: 1.1rem;
+}
+
+.gallery {
+  padding: 1rem 0 3rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-preview {
+  display: block;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, var(--surface), var(--border));
+  border-bottom: 1px solid var(--border);
+}
+
+.card-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-preview .placeholder-label {
+  display: none;
+}
+
+.card-preview.placeholder .placeholder-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  inset: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.card-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-body h2 {
+  font-size: 1.25rem;
+}
+
+.card-body p {
+  flex: 1;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.how-it-works {
+  padding: 1rem 0 3.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 3rem;
+}
+
+.steps {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+.steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.step-number {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem 0;
+}
+
+.site-footer a {
+  font-weight: 500;
+}
+
+.fine-print {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
