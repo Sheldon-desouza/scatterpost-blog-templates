@@ -6,11 +6,13 @@
  * records as the canonical.
  */
 import { revalidatePath } from "next/cache";
-import { getStore, webhookSecret } from "../../../lib/site.ts";
+import { after } from "next/server";
+import { getStore, siteUrl, webhookSecret } from "../../../lib/site.ts";
 import { verifySignature } from "../../../lib/scatterpost/verify-signature.ts";
 import { ScatterpostPayloadSchema } from "../../../lib/scatterpost/scatterpost-payload.ts";
 import { slugifyWithFallback } from "../../../lib/scatterpost/slugify.ts";
 import { isChangelogPost, urlForPost } from "../../../lib/changelog.ts";
+import { pingIndexNow } from "../../../lib/scatterpost/indexnow.ts";
 
 function revalidateEverywhereAPostCanAppear(slug: string, isChangelog: boolean): void {
   revalidatePath(isChangelog ? `/changelog/${slug}` : `/blog/${slug}`);
@@ -77,5 +79,11 @@ export async function POST(request: Request): Promise<Response> {
   const isChangelog = isChangelogPost({ tags: payload.tags });
   revalidateEverywhereAPostCanAppear(slug, isChangelog);
 
-  return Response.json({ url: urlForPost({ slug, tags: payload.tags }) });
+  const url = urlForPost({ slug, tags: payload.tags });
+  // Fire-and-forget: scheduled with `after` so it runs once this
+  // response has been sent, and never delays or fails the publish
+  // itself (see indexnow.ts).
+  after(() => pingIndexNow({ siteUrl: siteUrl(), postUrl: url }));
+
+  return Response.json({ url });
 }

@@ -49,6 +49,42 @@ export function authorUrl(): string | undefined {
 }
 
 /**
+ * Comma-separated list of the author or organisation's other profiles
+ * (e.g. GitHub, LinkedIn, X), validated to https URLs only, fed into
+ * the home page's `Person`/`Organization` JSON-LD as `sameAs` so search
+ * engines and AI assistants can connect this site to those profiles. An
+ * entry that fails to parse as a URL, or is not https, is dropped
+ * rather than failing the whole list.
+ */
+export function sameAsUrls(): string[] {
+  const raw = process.env.SAME_AS;
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((url) => url.trim())
+    .filter((url) => {
+      try {
+        return new URL(url).protocol === "https:";
+      } catch {
+        return false;
+      }
+    });
+}
+
+/**
+ * Search engine verification, read into `metadata.verification` by
+ * every template's `layout.tsx`. `undefined` when unset, so Next omits
+ * the meta tag entirely rather than rendering one with an empty value.
+ */
+export function googleSiteVerification(): string | undefined {
+  return process.env.GOOGLE_SITE_VERIFICATION || undefined;
+}
+
+export function bingSiteVerification(): string | undefined {
+  return process.env.BING_SITE_VERIFICATION || undefined;
+}
+
+/**
  * `CONTENT_STORE` chooses the persistence backend: `"blob"` (Vercel
  * Blob, writes `posts/*.md`), `"file"` (writes `content/posts/*.md`,
  * local dev only, since Vercel's production filesystem is read-only) or

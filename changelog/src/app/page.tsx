@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { authorName, authorUrl, getStore, siteDescription, siteName, siteUrl } from "../lib/site.ts";
+import { authorName, authorUrl, getStore, sameAsUrls, siteDescription, siteName, siteUrl } from "../lib/site.ts";
 import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
 import { parseVersion, splitPosts } from "../lib/changelog.ts";
 
@@ -9,9 +9,10 @@ export default async function HomePage() {
   const latestBlog = blogPosts.slice(0, 3);
   const site = siteUrl();
 
+  const sameAs = sameAsUrls();
   const author = authorUrl()
-    ? { "@type": "Person", name: authorName(), url: authorUrl() }
-    : { "@type": "Organization", name: authorName() };
+    ? { "@type": "Person", name: authorName(), url: authorUrl(), sameAs: sameAs.length > 0 ? sameAs : undefined }
+    : { "@type": "Organization", name: authorName(), sameAs: sameAs.length > 0 ? sameAs : undefined };
 
   const jsonLd = {
     "@context": "https://schema.org",

@@ -7,8 +7,9 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { getStore, postUrl } from "../../../../lib/site.ts";
+import { getStore, postUrl, siteUrl } from "../../../../lib/site.ts";
 import { pullDuePublications } from "../../../../lib/scatterpost/pull.ts";
+import { pingIndexNow } from "../../../../lib/scatterpost/indexnow.ts";
 
 function hasValidCronSecret(request: Request): boolean {
   const header = request.headers.get("authorization") ?? "";
@@ -41,6 +42,9 @@ export async function GET(request: Request): Promise<Response> {
     apiKey,
     store: getStore(),
     buildUrl: postUrl,
+    // Fire-and-forget per post; never awaited, never fails the run
+    // (see indexnow.ts).
+    onPublished: (url) => pingIndexNow({ siteUrl: siteUrl(), postUrl: url }),
   });
 
   if (summary.published > 0) {

@@ -77,6 +77,11 @@ export interface PullDeps {
   store: ContentStore;
   buildUrl: (slug: string) => string;
   now?: () => Date;
+  // Called with each newly published post's URL, after the PATCH back
+  // to scatterpost succeeds. Optional, and never awaited by this
+  // function: the pull route uses it to fire an IndexNow ping per post
+  // without this module needing to know anything about IndexNow.
+  onPublished?: (url: string) => void;
 }
 
 export interface PullSummary {
@@ -184,6 +189,7 @@ export async function pullDuePublications(deps: PullDeps): Promise<PullSummary> 
         });
 
         summary.published += 1;
+        deps.onPublished?.(url);
       } catch (cause) {
         summary.failed += 1;
         summary.errors.push(cause instanceof Error ? cause.message : String(cause));

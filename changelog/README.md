@@ -42,6 +42,12 @@ See `.env.example` for the full list with comments. In short:
 | `BLOB_READ_WRITE_TOKEN` | `CONTENT_STORE=blob` | Set automatically when a Blob store is connected to the project. |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | `CONTENT_STORE=supabase` only | Run `supabase/posts.sql` once against that project first. |
 
+If you create the Vercel Blob store yourself instead of using the
+Deploy button above (for example, adding one to a project you already
+deployed), choose **Private** and tick **"Add a read-write token env
+var"** when prompted: that is what sets `BLOB_READ_WRITE_TOKEN`, which
+this template reads.
+
 `vercel.json` ships with no `crons` block, so the default (push mode)
 deploys cleanly on every Vercel plan, including Hobby. Pull mode needs
 one:
@@ -140,6 +146,38 @@ scatterpost recorded.
 None of this promises a ranking or a citation; it gives search engines
 and AI assistants a clean, well-described copy of each post and
 changelog entry to read.
+
+## Search and analytics setup
+
+A short, plain-English walkthrough for a founder with no technical
+background lives in the repository root's `SETUP.md`. In short:
+
+- **Google Search Console**: add your site, verify it with the code you
+  put in `GOOGLE_SITE_VERIFICATION`, then submit `/sitemap.xml` so
+  Google knows what to crawl.
+- **Bing Webmaster Tools**: the same idea, verified with
+  `BING_SITE_VERIFICATION`. Bing's index also feeds several AI
+  assistants (including Microsoft Copilot), so this one step reaches
+  further than Bing search alone.
+- **Google Analytics (GA4)**: optional. Set
+  `NEXT_PUBLIC_GA_MEASUREMENT_ID` and a small cookie banner appears for
+  every visitor; nothing is tracked, and no cookie is set, until they
+  click Accept. "Cookie settings" in the footer lets them change their
+  mind later.
+- **`robots.txt` and `llms.txt`**: generated automatically. `robots.txt`
+  tells search engines and AI crawlers (GPTBot, ClaudeBot,
+  PerplexityBot, Google-Extended by name) that they are welcome here;
+  `llms.txt` is a plain-text summary of this site written for an AI
+  assistant to read directly.
+- **IndexNow**: optional. Set `INDEXNOW_KEY` and every publish pings
+  Bing (and the AI assistants it feeds) straight away, instead of
+  waiting for its next crawl.
+
+None of this guarantees a ranking, a citation, or any particular amount
+of traffic; it simply gives search engines and AI assistants a clean,
+well-described, quickly-discovered copy of each post and changelog
+entry to read.
+
 
 ## Local development
 

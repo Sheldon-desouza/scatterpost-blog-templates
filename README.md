@@ -40,6 +40,14 @@ own URL for a post becomes the canonical scatterpost cross-posts with.
 See a template's README for the exact steps and the JSON shape scatterpost
 expects.
 
+## Search and analytics setup
+
+See [`SETUP.md`](./SETUP.md) for a plain-English walkthrough: Google
+Search Console and Bing Webmaster Tools verification, optional GA4
+analytics behind a consent banner, and optional IndexNow pings on
+publish. Every template already generates `robots.txt`, `sitemap.xml`
+and `llms.txt` with nothing to configure.
+
 ## Repository layout
 
 ```

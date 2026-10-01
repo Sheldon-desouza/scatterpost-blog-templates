@@ -6,10 +6,12 @@
  * records as the canonical.
  */
 import { revalidatePath } from "next/cache";
-import { getStore, postUrl, webhookSecret } from "../../../lib/site.ts";
+import { after } from "next/server";
+import { getStore, postUrl, siteUrl, webhookSecret } from "../../../lib/site.ts";
 import { verifySignature } from "../../../lib/scatterpost/verify-signature.ts";
 import { ScatterpostPayloadSchema } from "../../../lib/scatterpost/scatterpost-payload.ts";
 import { slugifyWithFallback } from "../../../lib/scatterpost/slugify.ts";
+import { pingIndexNow } from "../../../lib/scatterpost/indexnow.ts";
 
 function revalidateEverywhereAPostCanAppear(slug: string): void {
   revalidatePath(`/blog/${slug}`);
@@ -76,5 +78,11 @@ export async function POST(request: Request): Promise<Response> {
 
   revalidateEverywhereAPostCanAppear(slug);
 
-  return Response.json({ url: postUrl(slug) });
+  const url = postUrl(slug);
+  // Fire-and-forget: scheduled with `after` so it runs once this
+  // response has been sent, and never delays or fails the publish
+  // itself (see indexnow.ts).
+  after(() => pingIndexNow({ siteUrl: siteUrl(), postUrl: url }));
+
+  return Response.json({ url });
 }

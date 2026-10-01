@@ -1,15 +1,16 @@
 import Link from "next/link";
 import { getStore } from "../lib/site.ts";
-import { authorName, authorUrl, siteName, siteUrl } from "../lib/site.ts";
+import { authorName, authorUrl, sameAsUrls, siteName, siteUrl } from "../lib/site.ts";
 import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
 
 export default async function HomePage() {
   const posts = (await getStore().list()).slice(0, 5);
   const site = siteUrl();
 
+  const sameAs = sameAsUrls();
   const author = authorUrl()
-    ? { "@type": "Person", name: authorName(), url: authorUrl() }
-    : { "@type": "Organization", name: authorName() };
+    ? { "@type": "Person", name: authorName(), url: authorUrl(), sameAs: sameAs.length > 0 ? sameAs : undefined }
+    : { "@type": "Organization", name: authorName(), sameAs: sameAs.length > 0 ? sameAs : undefined };
 
   const jsonLd = {
     "@context": "https://schema.org",

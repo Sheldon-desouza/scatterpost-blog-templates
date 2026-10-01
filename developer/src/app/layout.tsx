@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
-import { authorName, siteName, siteUrl } from "../lib/site.ts";
+import { authorName, bingSiteVerification, googleSiteVerification, siteName, siteUrl } from "../lib/site.ts";
+import { ConsentBanner, CookieSettingsLink } from "../components/consent-banner.tsx";
+import { SiteAnalytics } from "../components/site-analytics.tsx";
 
 /**
  * Hanken Grotesk: a clean, low-contrast grotesk that reads well at
@@ -31,6 +33,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: { default: siteName(), template: `%s | ${siteName()}` },
   description: `${siteName()}, a blog by ${authorName()}, published with scatterpost.`,
+  alternates: {
+    types: { "application/rss+xml": [{ url: "/feed.xml", title: siteName() }] },
+  },
+  verification: {
+    google: googleSiteVerification(),
+    other: bingSiteVerification() ? { "msvalidate.01": bingSiteVerification()! } : undefined,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -60,10 +69,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="https://scatterpost.io" className="underline">
                 scatterpost
               </a>
-              .
+              . <CookieSettingsLink />
             </p>
           </footer>
         </div>
+        <ConsentBanner />
+        <SiteAnalytics />
       </body>
     </html>
   );
