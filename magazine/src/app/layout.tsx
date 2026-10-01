@@ -1,28 +1,40 @@
 import type { Metadata } from "next";
-import { Fraunces, Work_Sans } from "next/font/google";
+import { JetBrains_Mono, Newsreader, Public_Sans } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import { authorName, bingSiteVerification, googleSiteVerification, siteName, siteUrl } from "../lib/site.ts";
+import { NAV_LINKS, showScatterpostBadge } from "../lib/config.ts";
+import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import { ConsentBanner, CookieSettingsLink } from "../components/consent-banner.tsx";
 import { SiteAnalytics } from "../components/site-analytics.tsx";
 
 /**
- * Fraunces: a characterful display serif with deliberate, slightly
- * dramatic curves, for headlines. Work Sans: a plain, highly readable
- * sans for body copy, so long articles do not fight the headline face.
- * Both are loaded once here and applied through `--font-display` and
- * `--font-body` CSS variables in globals.css, which is how next/font
- * avoids a layout-shifting webfont flash.
+ * Three faces, loaded once and applied through CSS variables in
+ * globals.css (next/font/google avoids a layout-shifting webfont
+ * flash): Newsreader for headlines, pull quotes and the article body
+ * (a variable optical-size serif, so a big headline and small body text
+ * each get their own cut), Public Sans for the UI (nav, meta, cards),
+ * JetBrains Mono for code, ligatures off.
  */
-const fraunces = Fraunces({
+const newsreader = Newsreader({
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600"],
   variable: "--font-display",
   display: "swap",
 });
 
-const workSans = Work_Sans({
+const publicSans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-body",
+  weight: ["400", "500", "600"],
+  variable: "--font-ui",
+  display: "swap",
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -39,38 +51,59 @@ export const metadata: Metadata = {
   },
 };
 
+// Applies a stored theme choice before first paint, so there is no
+// flash of the wrong palette. Absent (the "system" default), the CSS
+// media query in globals.css takes over. Inline and tiny on purpose:
+// anything heavier would itself delay the paint it exists to avoid.
+const noFlashThemeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-GB" className={`${fraunces.variable} ${workSans.variable}`}>
+    <html
+      lang="en-GB"
+      className={`${newsreader.variable} ${publicSans.variable} ${jetBrainsMono.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: noFlashThemeScript }} />
+      </head>
       <body className="min-h-screen antialiased">
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
-        <div className="wide mx-auto flex min-h-screen flex-col gap-10 px-4 py-8 sm:px-6">
-          <header className="flex items-center justify-between border-b border-[var(--border)] pb-4">
-            <Link href="/" className="tap-target font-display text-lg font-semibold">
+        <div className="site-shell">
+          <header className="site-header">
+            <Link href="/" className="tap-target site-wordmark">
               {siteName()}
             </Link>
-            <nav className="flex items-center gap-4">
-              <Link href="/blog" className="tap-target underline">
-                Blog
-              </Link>
-              <Link href="/tags" className="tap-target underline">
-                Tags
-              </Link>
+            <nav className="site-nav">
+              {NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="tap-target">
+                  {link.label}
+                </Link>
+              ))}
+              <ThemeToggle />
             </nav>
           </header>
-          <main id="main-content" className="flex-1">
+          <main id="main-content" className="site-main">
             {children}
           </main>
-          <footer className="border-t border-[var(--border)] pt-4 text-sm text-[var(--muted-foreground)]">
+          <footer className="site-footer">
             <p>
-              {siteName()} is published with{" "}
-              <a href="https://scatterpost.io" className="underline">
-                scatterpost
-              </a>
-              . <CookieSettingsLink />
+              &copy; {new Date().getFullYear()} {authorName()}
+              {showScatterpostBadge() ? (
+                <>
+                  . Published with{" "}
+                  <a href="https://scatterpost.io">scatterpost</a>.
+                </>
+              ) : (
+                "."
+              )}
             </p>
+            <div className="footer-links">
+              <Link href="/feed.xml">RSS</Link>
+              <Link href="/sitemap.xml">Sitemap</Link>
+              <CookieSettingsLink />
+            </div>
           </footer>
         </div>
         <ConsentBanner />
