@@ -126,7 +126,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         </p>
 
         <figure className="post-cover">
-          <Cover title={post.title} kicker={kicker} cover={post.cover} coverAlt={post.coverAlt} priority />
+          <Cover title={post.title} cover={post.cover} coverAlt={post.coverAlt} priority />
           <figcaption>{post.title}</figcaption>
         </figure>
 

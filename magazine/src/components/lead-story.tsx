@@ -19,7 +19,7 @@ export function LeadStory({ post }: { post: StoredPost }) {
   return (
     <article className="lead-story">
       <Link href={`/blog/${post.slug}`} className="lead-story-cover" aria-label={post.title}>
-        <Cover title={post.title} kicker={kicker} cover={post.cover} coverAlt={post.coverAlt} priority />
+        <Cover title={post.title} cover={post.cover} coverAlt={post.coverAlt} priority />
       </Link>
       <div className="lead-story-body">
         <p className="kicker">{kicker}</p>

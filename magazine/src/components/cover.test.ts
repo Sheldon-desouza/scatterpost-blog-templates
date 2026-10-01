@@ -8,14 +8,26 @@ function imgProps(element: ReactElement): { alt?: string } {
   return img.props;
 }
 
+function placeholderLetter(element: ReactElement): string {
+  const outer = element as unknown as { props: { children: ReactElement[] } };
+  const placeholderDiv = outer.props.children[0] as unknown as { props: { children: ReactElement } };
+  const span = placeholderDiv.props.children as unknown as { props: { children: string } };
+  return span.props.children;
+}
+
 describe("Cover", () => {
   it("uses coverAlt as the cover image's alt text when present", () => {
-    const element = Cover({ title: "Hello world", kicker: "Dispatch", cover: "https://example.com/cover.png", coverAlt: "A chart." });
+    const element = Cover({ title: "Hello world", cover: "https://example.com/cover.png", coverAlt: "A chart." });
     expect(imgProps(element).alt).toBe("A chart.");
   });
 
   it("falls back to an empty, decorative alt when coverAlt is absent (existing behaviour)", () => {
-    const element = Cover({ title: "Hello world", kicker: "Dispatch", cover: "https://example.com/cover.png" });
+    const element = Cover({ title: "Hello world", cover: "https://example.com/cover.png" });
     expect(imgProps(element).alt).toBe("");
+  });
+
+  it("shows the title's first letter in the placeholder when there is no cover", () => {
+    const element = Cover({ title: "Hello world" });
+    expect(placeholderLetter(element)).toBe("H");
   });
 });

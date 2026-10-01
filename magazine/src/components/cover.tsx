@@ -17,7 +17,6 @@ import { coverPlaceholder } from "../lib/cover-placeholder.ts";
 
 interface CoverProps {
   title: string;
-  kicker: string;
   cover?: string;
   /** Alt text for the cover image, from `coverImageAlt` on the
    * scatterpost payload. When absent, the image stays decorative
@@ -38,7 +37,7 @@ function isSafeHttpsUrl(url: string): boolean {
   }
 }
 
-export function Cover({ title, kicker, cover, coverAlt, priority = false }: CoverProps) {
+export function Cover({ title, cover, coverAlt, priority = false }: CoverProps) {
   if (cover && isSafeHttpsUrl(cover)) {
     return (
       <div className="cover-frame">
@@ -55,11 +54,11 @@ export function Cover({ title, kicker, cover, coverAlt, priority = false }: Cove
     );
   }
 
-  const placeholder = coverPlaceholder(kicker);
+  const placeholder = coverPlaceholder(title);
   return (
     <div className="cover-frame cover-frame-placeholder">
       <div className="cover-placeholder" aria-hidden="true">
-        <span>{placeholder.label}</span>
+        <span className="cover-placeholder-letter">{placeholder.letter}</span>
       </div>
       <span className="sr-only">{title}</span>
     </div>
