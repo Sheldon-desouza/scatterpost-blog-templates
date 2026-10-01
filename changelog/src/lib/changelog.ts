@@ -44,6 +44,30 @@ export function parseVersion(title: string): string | undefined {
   return match ? match[1] : undefined;
 }
 
+export type ChangelogCategory = "new" | "improved" | "fixed";
+
+// A changelog entry's category tag ("New", "Improved", "Fixed") comes
+// from the same `tags` array the "changelog" tag itself is read from,
+// so a founder (or scatterpost) marks an entry's category by tagging
+// it, the same way they already tag it "changelog". A synonym or two
+// ("improvement", "fix") is accepted so a natural word still matches;
+// an entry with none of these tags simply shows no category pill.
+const CATEGORY_SYNONYMS: Record<string, ChangelogCategory> = {
+  new: "new",
+  improved: "improved",
+  improvement: "improved",
+  fixed: "fixed",
+  fix: "fixed",
+};
+
+export function parseCategory(tags: string[]): ChangelogCategory | undefined {
+  for (const tag of tags) {
+    const match = CATEGORY_SYNONYMS[tag.trim().toLowerCase()];
+    if (match) return match;
+  }
+  return undefined;
+}
+
 /**
  * `pullDuePublications()` (in `./scatterpost/pull.ts`, synced from
  * `shared/` and never hand-edited) resolves each saved post's URL

@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { authorName, authorUrl, getStore, postUrl, siteName, siteUrl } from "../../../lib/site.ts";
 import { renderMarkdown } from "../../../lib/scatterpost/render-markdown.ts";
 import { isValidSlug, serialiseJsonLd } from "../../../lib/scatterpost/safe-html.ts";
-import { isChangelogPost } from "../../../lib/changelog.ts";
+import { isChangelogPost, splitPosts } from "../../../lib/changelog.ts";
+import { CodeBlocks } from "../../../components/CodeBlocks.tsx";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -28,6 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "article",
       publishedTime: post.date,
       tags: post.tags,
+      images: post.cover ? [post.cover] : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -35,6 +38,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: post.description,
     },
   };
+}
+
+function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
@@ -45,11 +52,17 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!isValidSlug(slug)) {
     notFound();
   }
-  const post = await getStore().get(slug);
+  const { blogPosts } = splitPosts(await getStore().list());
+  const index = blogPosts.findIndex((candidate) => candidate.slug === slug);
+  const post = index === -1 ? await getStore().get(slug) : blogPosts[index];
   // A changelog-tagged post lives at /changelog/[slug], not here.
   if (!post || isChangelogPost(post)) {
     notFound();
   }
+  // Newest first: the next item in the array is older (prev), the
+  // previous item is newer (next).
+  const previousPost = index > -1 ? blogPosts[index + 1] : undefined;
+  const nextPost = index > 0 ? blogPosts[index - 1] : undefined;
 
   const canonical = post.canonical ?? postUrl(post.slug);
   const html = renderMarkdown(post.bodyMarkdown);
@@ -86,22 +99,51 @@ export default async function BlogPostPage({ params }: PageProps) {
   return (
     <div className="measure flex flex-col gap-4">
       <article>
-        <h1 className="text-3xl font-semibold">{post.title}</h1>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          By {authorUrl() ? (
-            <a href={authorUrl()} rel="author" className="underline">
+        <h1 className="entry-h1">{post.title}</h1>
+        <p className="entry-byline">
+          By{" "}
+          {authorUrl() ? (
+            <a href={authorUrl()} rel="author">
               {authorName()}
             </a>
           ) : (
             authorName()
-          )}
+          )}{" "}
+          &middot; <time dateTime={post.date}>{formatDate(post.date)}</time>
         </p>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          <time dateTime={post.date}>
-            {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
-          </time>
+        {post.cover ? (
+          <p className="entry-cover">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={post.cover} alt={post.title} width={1200} height={630} />
+          </p>
+        ) : null}
+        <div className="prose mt-10" dangerouslySetInnerHTML={{ __html: html }} />
+        <CodeBlocks />
+
+        {previousPost || nextPost ? (
+          <nav className="post-footer-nav" aria-label="More articles">
+            {previousPost ? (
+              <Link href={`/blog/${previousPost.slug}`} className="prev">
+                <span className="label">Previous</span>
+                <span className="title">{previousPost.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {nextPost ? (
+              <Link href={`/blog/${nextPost.slug}`} className="next">
+                <span className="label">Next</span>
+                <span className="title">{nextPost.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        ) : null}
+
+        <p className="subscribe-line">
+          Subscribe over <Link href="/feed.xml">RSS</Link>.
         </p>
-        <div className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
       </article>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(breadcrumbJsonLd) }} />
