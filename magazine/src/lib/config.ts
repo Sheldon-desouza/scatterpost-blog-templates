@@ -44,10 +44,11 @@ export const SOCIAL_LINKS: SiteLink[] = [
 ];
 
 /**
- * The optional "Published with scatterpost" footer line. On by default:
- * the template is free to use with or without it, but it costs the
- * founder nothing to leave on and it is how other founders find
- * scatterpost. Set `NEXT_PUBLIC_SHOW_SCATTERPOST_BADGE=false` to hide it.
+ * The optional "Published with scatterpost" footer line. On by default,
+ * but only actually shown once the newer "Built with a scatterpost
+ * template" credit is turned off (`NEXT_PUBLIC_SHOW_SCATTERPOST_CREDIT=
+ * false`): a footer never carries both. Set
+ * `NEXT_PUBLIC_SHOW_SCATTERPOST_BADGE=false` as well to show neither.
  */
 export function showScatterpostBadge(): boolean {
   return process.env.NEXT_PUBLIC_SHOW_SCATTERPOST_BADGE !== "false";

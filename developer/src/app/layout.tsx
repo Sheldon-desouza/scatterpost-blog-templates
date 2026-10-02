@@ -4,7 +4,7 @@ import Link from "next/link";
 import "./globals.css";
 import { authorName, bingSiteVerification, googleSiteVerification, siteName, siteUrl } from "../lib/site.ts";
 import { NAV_LINKS, showScatterpostBadge } from "../lib/config.ts";
-import { showScatterpostCredit } from "../lib/scatterpost/scatterpost-credit.ts";
+import { showPublishedWithBadge, showScatterpostCredit } from "../lib/scatterpost/scatterpost-credit.ts";
 import { ThemeToggle } from "../components/theme-toggle.tsx";
 import { DemoBar } from "../components/DemoBar.tsx";
 import { ConsentBanner, CookieSettingsLink } from "../components/consent-banner.tsx";
@@ -51,6 +51,8 @@ export const metadata: Metadata = {
 const noFlashThemeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const showCredit = showScatterpostCredit();
+  const showBadge = showPublishedWithBadge(showCredit, showScatterpostBadge());
   return (
     <html lang="en-GB" className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
       <head>
@@ -81,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="site-footer">
             <p>
               &copy; {new Date().getFullYear()} {authorName()}
-              {showScatterpostBadge() ? (
+              {showBadge ? (
                 <>
                   . Published with <a href="https://scatterpost.io">scatterpost</a>.
                 </>
@@ -94,7 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/sitemap.xml">Sitemap</Link>
               <CookieSettingsLink />
             </div>
-            {showScatterpostCredit() ? (
+            {showCredit ? (
               <p className="footer-credit">
                 <a href="https://scatterpost.io/templates">Built with a scatterpost template</a>
               </p>

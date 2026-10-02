@@ -176,7 +176,10 @@ background lives in the repository root's `SETUP.md`. In short:
   waiting for its next crawl.
 - **Footer credit**: "Built with a scatterpost template" links to
   https://scatterpost.io/templates, shown by default. Set
-  `NEXT_PUBLIC_SHOW_SCATTERPOST_CREDIT=false` to hide it.
+  `NEXT_PUBLIC_SHOW_SCATTERPOST_CREDIT=false` to hide it, which brings
+  back the older "Published with scatterpost." sentence if
+  `NEXT_PUBLIC_SHOW_SCATTERPOST_BADGE` is not also set to `false`. A
+  footer never shows both at once.
 
 None of this guarantees a ranking, a citation, or any particular amount
 of traffic; it simply gives search engines and AI assistants a clean,
