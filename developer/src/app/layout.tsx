@@ -4,6 +4,7 @@ import Link from "next/link";
 import "./globals.css";
 import { authorName, bingSiteVerification, googleSiteVerification, siteName, siteUrl } from "../lib/site.ts";
 import { NAV_LINKS, showScatterpostBadge } from "../lib/config.ts";
+import { showScatterpostCredit } from "../lib/scatterpost/scatterpost-credit.ts";
 import { ThemeToggle } from "../components/theme-toggle.tsx";
 import { DemoBar } from "../components/DemoBar.tsx";
 import { ConsentBanner, CookieSettingsLink } from "../components/consent-banner.tsx";
@@ -93,6 +94,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/sitemap.xml">Sitemap</Link>
               <CookieSettingsLink />
             </div>
+            {showScatterpostCredit() ? (
+              <p className="footer-credit">
+                <a href="https://scatterpost.io/templates">Built with a scatterpost template</a>
+              </p>
+            ) : null}
           </footer>
         </div>
         <ConsentBanner />

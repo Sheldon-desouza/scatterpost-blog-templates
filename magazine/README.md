@@ -1,5 +1,7 @@
 # Magazine
 
+[See all four templates with live demos](../README.md) · made by [scatterpost](https://scatterpost.io)
+
 An editorial, card-grid Next.js blog for a product or marketing
 founder: a large featured post up top, then a responsive grid of cards
 with cover images, descriptions, dates and tags, plus `/tags/[tag]`
@@ -172,6 +174,9 @@ background lives in the repository root's `SETUP.md`. In short:
 - **IndexNow**: optional. Set `INDEXNOW_KEY` and every publish pings
   Bing (and the AI assistants it feeds) straight away, instead of
   waiting for its next crawl.
+- **Footer credit**: "Built with a scatterpost template" links to
+  https://scatterpost.io/templates, shown by default. Set
+  `NEXT_PUBLIC_SHOW_SCATTERPOST_CREDIT=false` to hide it.
 
 None of this guarantees a ranking, a citation, or any particular amount
 of traffic; it simply gives search engines and AI assistants a clean,

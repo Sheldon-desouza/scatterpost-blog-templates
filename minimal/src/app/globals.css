@@ -188,6 +188,10 @@ a {
   gap: 1.5rem;
 }
 
+.footer-credit {
+  flex-basis: 100%;
+}
+
 /* Measure: the article column width */
 .measure {
   max-width: 70ch;

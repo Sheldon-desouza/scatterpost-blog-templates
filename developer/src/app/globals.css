@@ -221,6 +221,10 @@ a {
   gap: 1.5rem;
 }
 
+.footer-credit {
+  flex-basis: 100%;
+}
+
 .cookie-settings-link {
   font: inherit;
   color: inherit;
