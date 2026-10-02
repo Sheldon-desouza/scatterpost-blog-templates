@@ -1,8 +1,10 @@
 /**
- * Demo-mode env reads for the slim bar `DemoBar` renders above the
- * header on demo.scatterpost.io. All optional, all unset in a normal
- * deploy: `NEXT_PUBLIC_DEMO_TEMPLATE` being unset is what keeps the bar
- * from ever rendering for a founder's own blog (see `DemoBar`).
+ * Demo-mode env reads: the slim bar `DemoBar` renders above the header
+ * (gated on `NEXT_PUBLIC_DEMO_TEMPLATE`), and the seeded demo posts
+ * `getStore()` reads alongside a founder's own posts (gated on its own,
+ * separate `NEXT_PUBLIC_DEMO_SEED_CONTENT`, so the demo bar can stay on
+ * while seeding is switched off once real scatterpost posts arrive).
+ * All optional, all unset in a normal deploy.
  */
 
 /** This template's display name on the demo bar, e.g. "Changelog".
@@ -22,4 +24,17 @@ export function demoDeployUrl(): string {
 
 export function demoGalleryUrl(): string {
   return process.env.NEXT_PUBLIC_DEMO_GALLERY_URL || "https://demo.scatterpost.io/";
+}
+
+/**
+ * Whether this deploy should list the committed demo posts under
+ * `demo-content/posts` alongside (or, before a founder connects
+ * scatterpost, instead of) its own `content/posts`. Separate from
+ * `NEXT_PUBLIC_DEMO_TEMPLATE` (which only shows the bar above the
+ * header) so a demo deploy can turn seeding off, once real posts exist,
+ * without also hiding the bar. Must be exactly `"true"`: unset, empty or
+ * any other value leaves a founder's own blog unaffected.
+ */
+export function demoSeedContent(): boolean {
+  return process.env.NEXT_PUBLIC_DEMO_SEED_CONTENT === "true";
 }
