@@ -1,8 +1,8 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/minimal", "destination": "https://REPLACE-minimal-demo.vercel.app/minimal" },
-    { "source": "/minimal/:path*", "destination": "https://REPLACE-minimal-demo.vercel.app/minimal/:path*" },
+    { "source": "/minimal", "destination": "https://scatterpost-minimal-demo.vercel.app/minimal" },
+    { "source": "/minimal/:path*", "destination": "https://scatterpost-minimal-demo.vercel.app/minimal/:path*" },
     { "source": "/developer", "destination": "https://scatterpost-developer-demo.vercel.app/developer" },
     { "source": "/developer/:path*", "destination": "https://scatterpost-developer-demo.vercel.app/developer/:path*" },
     { "source": "/magazine", "destination": "https://scatterpost-magazine-demo.vercel.app/magazine" },
