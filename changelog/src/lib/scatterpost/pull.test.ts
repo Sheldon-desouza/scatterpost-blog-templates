@@ -200,6 +200,33 @@ describe("pullDuePublications", () => {
     expect(store.saved[0]?.slug).toBe("post-idem-emoji-1");
   });
 
+  it("fails a publication whose title slugifies to a reserved slug, without saving or PATCHing it", async () => {
+    const store = fakeStore();
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.endsWith("/api/v1/publications?channel=website&due=true")) {
+        return jsonResponse({ data: [publication], next_cursor: null });
+      }
+      if (url.endsWith("/api/v1/articles/article_1")) {
+        return jsonResponse({ ...article, title: "Tags" });
+      }
+      throw new Error(`Unexpected fetch: ${url} ${init?.method ?? "GET"}`);
+    });
+
+    const summary = await pullDuePublications({
+      apiUrl: "https://api.scatterpost.io",
+      apiKey: "test-fixture-api-key",
+      fetchImpl: fetchImpl as unknown as typeof fetch,
+      store,
+      buildUrl: (slug) => `https://founder.example.com/blog/${slug}`,
+      reservedSlugs: new Set(["tags"]),
+    });
+
+    expect(summary.published).toBe(0);
+    expect(summary.failed).toBe(1);
+    expect(summary.errors[0]).toMatch(/"tags", which is reserved/);
+    expect(store.saved).toHaveLength(0);
+  });
+
   it("does nothing when there are no due publications", async () => {
     const store = fakeStore();
     const fetchImpl = vi.fn(async () => jsonResponse({ data: [], next_cursor: null }));

@@ -3,7 +3,7 @@ import Link from "next/link";
 /**
  * Next's own not-found page for any path that falls through every
  * route, including an IndexNow key request that does not match
- * `INDEXNOW_KEY` (`src/app/[key]/route.ts`, security re-review
+ * `INDEXNOW_KEY` (`src/app/api/indexnow-key/[key]/route.ts`, security re-review
  * LOW-1).
  */
 export default function NotFound() {

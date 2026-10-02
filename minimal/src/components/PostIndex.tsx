@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { StoredPost } from "../lib/scatterpost/content-store.ts";
+import { postPath } from "../lib/scatterpost/post-paths.ts";
 
 /**
  * "All writing" index: posts grouped by year (newest year first, posts
@@ -24,7 +25,7 @@ export function PostIndex({ posts }: { posts: StoredPost[] }) {
           <ul>
             {yearPosts.map((post) => (
               <li key={post.slug}>
-                <Link href={`/blog/${post.slug}`} className="index-row">
+                <Link href={postPath(post.slug)} className="index-row">
                   <time dateTime={post.date} className="index-row-date">
                     {new Date(post.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
                   </time>

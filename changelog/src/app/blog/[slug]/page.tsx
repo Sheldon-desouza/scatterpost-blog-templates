@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { authorName, authorUrl, getStore, postUrl, siteName, siteUrl } from "../../../lib/site.ts";
 import { renderMarkdown } from "../../../lib/scatterpost/render-markdown.ts";
 import { isValidSlug, serialiseJsonLd } from "../../../lib/scatterpost/safe-html.ts";
+import { postPath, postsAtRoot } from "../../../lib/scatterpost/post-paths.ts";
 import { isChangelogPost, splitPosts } from "../../../lib/changelog.ts";
 import { CodeBlocks } from "../../../components/CodeBlocks.tsx";
 
@@ -19,6 +20,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!post || isChangelogPost(post)) return {};
 
   const canonical = post.canonical ?? postUrl(post.slug);
+  // A cover wins; otherwise this post's own generated card. Next does
+  // not add the opengraph-image file to metadata that sets openGraph
+  // itself, so it is named here, absolute and built from siteUrl() so a
+  // base path (NEXT_PUBLIC_SITE_URL=https://example.com/blog) is kept.
+  const images = post.cover
+    ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }]
+    : [{ url: `${postUrl(post.slug)}/opengraph-image`, width: 1200, height: 630, alt: post.title }];
   return {
     title: post.title,
     description: post.description,
@@ -30,13 +38,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "article",
       publishedTime: post.date,
       tags: post.tags,
-      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
+      images,
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
+      images,
     },
   };
 }
@@ -82,7 +90,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     dateModified: post.date,
     url: canonical,
     mainEntityOfPage: canonical,
-    image: post.cover ? [post.cover] : [`${site}/blog/${post.slug}/opengraph-image`],
+    image: post.cover ? [post.cover] : [`${site}${postPath(post.slug)}/opengraph-image`],
     author,
     publisher: author,
   };
@@ -90,11 +98,18 @@ export default async function BlogPostPage({ params }: PageProps) {
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: siteName(), item: site },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${site}/blog` },
-      { "@type": "ListItem", position: 3, name: post.title, item: canonical },
-    ],
+    // With posts at the root, the listing is the home page itself, so
+    // the "Blog" level is dropped rather than pointing at a redirect.
+    itemListElement: postsAtRoot()
+      ? [
+          { "@type": "ListItem", position: 1, name: siteName(), item: site },
+          { "@type": "ListItem", position: 2, name: post.title, item: canonical },
+        ]
+      : [
+          { "@type": "ListItem", position: 1, name: siteName(), item: site },
+          { "@type": "ListItem", position: 2, name: "Blog", item: `${site}/blog` },
+          { "@type": "ListItem", position: 3, name: post.title, item: canonical },
+        ],
   };
 
   return (
@@ -124,7 +139,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         {previousPost || nextPost ? (
           <nav className="post-footer-nav" aria-label="More articles">
             {previousPost ? (
-              <Link href={`/blog/${previousPost.slug}`} className="prev">
+              <Link href={postPath(previousPost.slug)} className="prev">
                 <span className="label">Previous</span>
                 <span className="title">{previousPost.title}</span>
               </Link>
@@ -132,7 +147,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               <span />
             )}
             {nextPost ? (
-              <Link href={`/blog/${nextPost.slug}`} className="next">
+              <Link href={postPath(nextPost.slug)} className="next">
                 <span className="label">Next</span>
                 <span className="title">{nextPost.title}</span>
               </Link>

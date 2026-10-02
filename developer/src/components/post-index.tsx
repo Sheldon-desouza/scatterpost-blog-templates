@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { StoredPost } from "../lib/scatterpost/content-store.ts";
 import { readingTimeMinutes } from "../lib/reading-time.ts";
 import { slugify } from "../lib/scatterpost/slugify.ts";
+import { postPath } from "../lib/scatterpost/post-paths.ts";
 
 /**
  * Dense index rows: a mono date, the title, a one-line summary, tag
@@ -13,7 +14,7 @@ export function PostIndex({ posts }: { posts: StoredPost[] }) {
     <ul className="index-list">
       {posts.map((post) => (
         <li key={post.slug} className="index-row">
-          <Link href={`/blog/${post.slug}`} className="index-row-link">
+          <Link href={postPath(post.slug)} className="index-row-link">
             <time dateTime={post.date} className="index-row-date">
               {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "2-digit" })}
             </time>

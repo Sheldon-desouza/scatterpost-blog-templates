@@ -5,6 +5,7 @@ import { collectTags, postsForTagSlug } from "../lib/tags.ts";
 import { LeadStory } from "../components/lead-story.tsx";
 import { PostCard } from "../components/post-card.tsx";
 import { AuthorBlock } from "../components/author-block.tsx";
+import { postsAtRoot } from "../lib/scatterpost/post-paths.ts";
 
 export default async function HomePage() {
   const posts = await getStore().list();
@@ -57,6 +58,12 @@ export default async function HomePage() {
     .filter((section) => section.posts.length > 0)
     .slice(0, 3);
 
+  // With posts at the root, /blog redirects here, so the home page also
+  // carries every post the sections above did not already show: the
+  // page as a whole is then the full listing.
+  const shownAbove = new Set([...shown, ...tagSections.flatMap((section) => section.posts.map((post) => post.slug))]);
+  const archive = postsAtRoot() ? posts.filter((post) => !shownAbove.has(post.slug)) : [];
+
   return (
     <div className="home">
       <LeadStory post={lead} />
@@ -81,6 +88,17 @@ export default async function HomePage() {
           </div>
         </section>
       ))}
+
+      {archive.length > 0 ? (
+        <section className="story-grid-section">
+          <h2 className="section-heading">More writing</h2>
+          <div className="story-grid">
+            {archive.map((post) => (
+              <PostCard key={post.slug} post={post} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <AuthorBlock />
 

@@ -21,6 +21,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!post || !isChangelogPost(post)) return {};
 
   const canonical = post.canonical ?? changelogUrl(post.slug);
+  // A cover wins; otherwise this post's own generated card. Next does
+  // not add the opengraph-image file to metadata that sets openGraph
+  // itself, so it is named here, absolute and built from siteUrl() so a
+  // base path (NEXT_PUBLIC_SITE_URL=https://example.com/blog) is kept.
+  const images = post.cover
+    ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }]
+    : [{ url: `${changelogUrl(post.slug)}/opengraph-image`, width: 1200, height: 630, alt: post.title }];
   return {
     title: post.title,
     description: post.description,
@@ -32,13 +39,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "article",
       publishedTime: post.date,
       tags: post.tags,
-      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
+      images,
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
+      images,
     },
   };
 }

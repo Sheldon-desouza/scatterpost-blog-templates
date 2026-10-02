@@ -4,6 +4,7 @@ import { kickerFor } from "../lib/kicker.ts";
 import { readingTime } from "../lib/reading-time.ts";
 import { authorName } from "../lib/site.ts";
 import { Cover } from "./cover.tsx";
+import { postPath } from "../lib/scatterpost/post-paths.ts";
 
 function formatDate(date: string): string {
   return new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
@@ -18,13 +19,13 @@ export function LeadStory({ post }: { post: StoredPost }) {
 
   return (
     <article className="lead-story">
-      <Link href={`/blog/${post.slug}`} className="lead-story-cover" aria-label={post.title}>
+      <Link href={postPath(post.slug)} className="lead-story-cover" aria-label={post.title}>
         <Cover title={post.title} cover={post.cover} coverAlt={post.coverAlt} priority />
       </Link>
       <div className="lead-story-body">
         <p className="kicker">{kicker}</p>
         <h1 className="lead-story-headline">
-          <Link href={`/blog/${post.slug}`}>{post.title}</Link>
+          <Link href={postPath(post.slug)}>{post.title}</Link>
         </h1>
         {post.description ? <p className="lead-story-dek">{post.description}</p> : null}
         <p className="lead-story-byline">

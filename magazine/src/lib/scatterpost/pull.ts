@@ -76,6 +76,10 @@ export interface PullDeps {
   fetchImpl?: typeof fetch;
   store: ContentStore;
   buildUrl: (slug: string) => string;
+  // Slugs a post may not take (see `reservedSlugsFor` in
+  // post-paths.ts). A title that slugifies to one fails that
+  // publication with a clear message rather than being saved.
+  reservedSlugs?: ReadonlySet<string>;
   now?: () => Date;
   // Called with each newly published post's URL, after the PATCH back
   // to scatterpost succeeds. Optional, and never awaited by this
@@ -169,7 +173,7 @@ export async function pullDuePublications(deps: PullDeps): Promise<PullSummary> 
 
         const title = publication.adapted_title ?? article.title;
         const post: StoredPost = {
-          slug: slugifyWithFallback(title, publication.idempotency_key),
+          slug: slugifyWithFallback(title, publication.idempotency_key, { reserved: deps.reservedSlugs }),
           scatterpostId: publication.idempotency_key,
           title,
           date: now().toISOString(),

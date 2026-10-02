@@ -12,6 +12,8 @@ import { getStore, siteUrl } from "../../../../lib/site.ts";
 import { pullDuePublications } from "../../../../lib/scatterpost/pull.ts";
 import { withPullUrlBuilder } from "../../../../lib/changelog.ts";
 import { pingIndexNow } from "../../../../lib/scatterpost/indexnow.ts";
+import { reservedSlugs } from "../../../../lib/top-level-routes.ts";
+import { postsIndexPath } from "../../../../lib/scatterpost/post-paths.ts";
 
 function hasValidCronSecret(request: Request): boolean {
   const header = request.headers.get("authorization") ?? "";
@@ -45,6 +47,7 @@ export async function GET(request: Request): Promise<Response> {
     apiKey,
     store,
     buildUrl,
+    reservedSlugs: reservedSlugs(),
     // Scheduled with `after` so it runs once this response has been
     // sent (security re-review LOW-2); fire-and-forget and never
     // throws synchronously either way (see indexnow.ts), so it can
@@ -56,7 +59,7 @@ export async function GET(request: Request): Promise<Response> {
     // A pull run can publish several posts at once; revalidate the
     // shared pages once rather than per post.
     revalidatePath("/changelog", "page");
-    revalidatePath("/blog", "page");
+    revalidatePath(postsIndexPath(), "page");
     revalidatePath("/", "page");
     revalidatePath("/sitemap.xml");
     revalidatePath("/feed.xml");

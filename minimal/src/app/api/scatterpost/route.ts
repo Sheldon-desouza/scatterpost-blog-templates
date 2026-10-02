@@ -10,12 +10,14 @@ import { after } from "next/server";
 import { getStore, postUrl, siteUrl, webhookSecret } from "../../../lib/site.ts";
 import { verifySignature } from "../../../lib/scatterpost/verify-signature.ts";
 import { ScatterpostPayloadSchema } from "../../../lib/scatterpost/scatterpost-payload.ts";
-import { slugifyWithFallback } from "../../../lib/scatterpost/slugify.ts";
+import { ReservedSlugError, slugifyWithFallback } from "../../../lib/scatterpost/slugify.ts";
+import { postPath, postsIndexPath } from "../../../lib/scatterpost/post-paths.ts";
+import { reservedSlugs } from "../../../lib/top-level-routes.ts";
 import { pingIndexNow } from "../../../lib/scatterpost/indexnow.ts";
 
 function revalidateEverywhereAPostCanAppear(slug: string): void {
-  revalidatePath(`/blog/${slug}`);
-  revalidatePath("/blog");
+  revalidatePath(postPath(slug));
+  revalidatePath(postsIndexPath());
   revalidatePath("/");
   revalidatePath("/sitemap.xml");
   revalidatePath("/feed.xml");
@@ -60,9 +62,26 @@ export async function POST(request: Request): Promise<Response> {
   }
   const payload = result.data;
 
+  // With NEXT_PUBLIC_POSTS_AT_ROOT=true a title that slugifies to an
+  // existing top-level route (blog, api, tags, ...) is refused with a
+  // 422, the same validation shape as a schema failure, rather than
+  // being published somewhere other than the URL it would claim.
+  let baseSlug: string;
+  try {
+    baseSlug = slugifyWithFallback(payload.title, payload.idempotencyKey, { reserved: reservedSlugs() });
+  } catch (cause) {
+    if (cause instanceof ReservedSlugError) {
+      return Response.json(
+        { error: "Payload failed validation.", details: { formErrors: [], fieldErrors: { title: [cause.message] } } },
+        { status: 422 },
+      );
+    }
+    throw cause;
+  }
+
   const store = getStore();
   const { slug } = await store.save({
-    slug: slugifyWithFallback(payload.title, payload.idempotencyKey),
+    slug: baseSlug,
     scatterpostId: payload.idempotencyKey,
     title: payload.title,
     date: payload.publishedAt,

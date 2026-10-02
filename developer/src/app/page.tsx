@@ -4,6 +4,8 @@ import { authorName, authorUrl, sameAsUrls, siteName, siteUrl } from "../lib/sit
 import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
 import { BIO, ROLE, SOCIAL_LINKS } from "../lib/config.ts";
 import { PostIndex, TagFilterRow } from "../components/post-index.tsx";
+import { postsAtRoot } from "../lib/scatterpost/post-paths.ts";
+import { withBasePath } from "../lib/scatterpost/post-paths.ts";
 
 export default async function HomePage() {
   const posts = await getStore().list();
@@ -31,7 +33,7 @@ export default async function HomePage() {
         {SOCIAL_LINKS.length > 0 ? (
           <nav className="home-links" aria-label="Elsewhere">
             {SOCIAL_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className="tap-target">
+              <a key={link.href} href={withBasePath(link.href)} className="tap-target">
                 {link.label}
               </a>
             ))}
@@ -57,11 +59,15 @@ export default async function HomePage() {
             <PostIndex posts={posts} />
           </section>
           <TagFilterRow posts={posts} />
-          <p className="home-links">
-            <Link href="/blog" className="tap-target">
-              All writing
-            </Link>
-          </p>
+          {/* With posts at the root this page already is the full
+              listing (/blog redirects here), so no link to it. */}
+          {postsAtRoot() ? null : (
+            <p className="home-links">
+              <Link href="/blog" className="tap-target">
+                All writing
+              </Link>
+            </p>
+          )}
         </>
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(jsonLd) }} />

@@ -9,15 +9,15 @@
  * the response neither confirms nor denies which key (if any) is
  * configured.
  *
- * The whole single path segment, including its `.txt` suffix, is the
- * dynamic `key` param here (there is no separate `[key]/route.ts` and
- * `.txt`-suffix split in the Next.js App Router); every other
- * top-level route (`/blog`, `/llms.txt`, `/sitemap.xml`, and so on) is
- * a literal folder, which Next always matches before falling back to
- * this dynamic one.
+ * `/{key}.txt` reaches this route through a rewrite in `next.config.ts`
+ * (to `/api/indexnow-key/{key}.txt`), so the top level of `src/app`
+ * stays free for the `[slug]` post route used when posts live at the
+ * root. The whole segment, including its `.txt` suffix, is the dynamic
+ * `key` param. Literal routes (`/llms.txt`, `/robots.txt`, and so on)
+ * are matched before the rewrite applies.
  */
 import { notFound } from "next/navigation";
-import { isValidIndexNowKey } from "../../lib/scatterpost/indexnow.ts";
+import { isValidIndexNowKey } from "../../../../lib/scatterpost/indexnow.ts";
 
 interface RouteProps {
   params: Promise<{ key: string }>;

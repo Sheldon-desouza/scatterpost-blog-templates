@@ -4,6 +4,7 @@
  * whether the footer credits scatterpost). Kept separate from
  * `site.ts`, which only reads `process.env`.
  */
+import { postsIndexPath } from "./scatterpost/post-paths.ts";
 
 export interface SiteLink {
   label: string;
@@ -13,7 +14,7 @@ export interface SiteLink {
 /** Shown in the header, next to the product name. Add or remove freely. */
 export const NAV_LINKS: SiteLink[] = [
   { label: "Changelog", href: "/changelog" },
-  { label: "Blog", href: "/blog" },
+  { label: "Blog", href: postsIndexPath() },
 ];
 
 /**

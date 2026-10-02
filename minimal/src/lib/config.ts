@@ -4,6 +4,7 @@
  * bio row of links, and whether the footer credits scatterpost). Kept
  * separate from `site.ts`, which only reads `process.env`.
  */
+import { postsIndexPath } from "./scatterpost/post-paths.ts";
 
 export interface SiteLink {
   label: string;
@@ -11,7 +12,7 @@ export interface SiteLink {
 }
 
 /** Shown in the header, next to the site name. Add or remove freely. */
-export const NAV_LINKS: SiteLink[] = [{ label: "Writing", href: "/blog" }];
+export const NAV_LINKS: SiteLink[] = [{ label: "Writing", href: postsIndexPath() }];
 
 /**
  * The one-line bio under the author's name on the home page. Plain

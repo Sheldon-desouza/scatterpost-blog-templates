@@ -7,7 +7,46 @@
 // here instead, cut at a hyphen so the slug never ends mid-word.
 const MAX_SLUG_LENGTH = 80;
 
-export function slugify(title: string): string {
+export interface SlugifyOptions {
+  /**
+   * Slugs a post may not take, because a top-level route already
+   * answers there (only non-empty while `NEXT_PUBLIC_POSTS_AT_ROOT` is
+   * on; see `reservedSlugsFor` in post-paths.ts).
+   */
+  reserved?: ReadonlySet<string>;
+}
+
+/**
+ * Thrown when a title slugifies to a reserved slug. Deliberately a
+ * refusal rather than a silent suffix: a post titled "Tags" quietly
+ * published at `/tags-2` would surprise its author, while a clear
+ * error (the receiver turns this into a 422, the pull run records it
+ * against the publication) says exactly which word to change.
+ */
+export class ReservedSlugError extends Error {
+  readonly slug: string;
+
+  constructor(slug: string) {
+    super(
+      `The title produces the slug "${slug}", which is reserved because a page of this site already lives at /${slug}. Change the title and publish again.`,
+    );
+    this.name = "ReservedSlugError";
+    this.slug = slug;
+  }
+}
+
+export function slugify(title: string, options: SlugifyOptions = {}): string {
+  return refuseReserved(baseSlugify(title), options);
+}
+
+function refuseReserved(slug: string, options: SlugifyOptions): string {
+  if (slug.length > 0 && options.reserved?.has(slug)) {
+    throw new ReservedSlugError(slug);
+  }
+  return slug;
+}
+
+function baseSlugify(title: string): string {
   const slug = title
     .toLowerCase()
     .trim()
@@ -36,11 +75,11 @@ function truncateAtHyphen(slug: string, maxLength: number): string {
  * slugified too, since a scatterpostId is not guaranteed to be
  * URL-safe on its own.
  */
-export function slugifyWithFallback(title: string, id: string): string {
-  const slug = slugify(title);
+export function slugifyWithFallback(title: string, id: string, options: SlugifyOptions = {}): string {
+  const slug = slugify(title, options);
   if (slug.length > 0) {
     return slug;
   }
-  const idSlug = slugify(id).slice(0, 12);
-  return idSlug.length > 0 ? `post-${idSlug}` : "post";
+  const idSlug = baseSlugify(id).slice(0, 12);
+  return refuseReserved(idSlug.length > 0 ? `post-${idSlug}` : "post", options);
 }

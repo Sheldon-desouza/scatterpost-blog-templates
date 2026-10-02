@@ -40,6 +40,7 @@ See `.env.example` for the full list with comments. In short:
 | `CONTENT_STORE` | always (optional) | `blob`, `file` or `supabase`. Defaults to `blob` when `BLOB_READ_WRITE_TOKEN` is set (which the Deploy button's Blob store does automatically), otherwise `file`. |
 | `BLOB_READ_WRITE_TOKEN` | `CONTENT_STORE=blob` | Set automatically when a Blob store is connected to the project. |
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | `CONTENT_STORE=supabase` only | Run `supabase/posts.sql` once against that project first. |
+| `NEXT_PUBLIC_POSTS_AT_ROOT` | optional | Set to `true` to serve the post listing at the site root and each post at `/<slug>` instead of `/blog/<slug>`; for a blog at `example.com/blog`, set `NEXT_PUBLIC_BASE_PATH=/blog`, `NEXT_PUBLIC_SITE_URL=https://example.com/blog` and this to `true`, and posts live at `example.com/blog/<slug>`. Old `/blog/<slug>` URLs redirect permanently, and a title whose slug would collide with a page of the site (`blog`, `api`, `tags` and so on) is refused with a 422. Set before building. |
 
 If you create the Vercel Blob store yourself instead of using the
 Deploy button above (for example, adding one to a project you already

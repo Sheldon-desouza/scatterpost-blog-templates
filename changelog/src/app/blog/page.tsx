@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getStore, siteName } from "../../lib/site.ts";
 import { splitPosts } from "../../lib/changelog.ts";
+import { postPath } from "../../lib/scatterpost/post-paths.ts";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -32,7 +33,7 @@ export default async function BlogIndexPage() {
         <ul className="post-list">
           {posts.map((post) => (
             <li key={post.slug} className="post-list-row">
-              <Link href={`/blog/${post.slug}`} className="post-list-title">
+              <Link href={postPath(post.slug)} className="post-list-title">
                 {post.title}
               </Link>
               <p className="post-list-meta">

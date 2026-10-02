@@ -2,6 +2,7 @@ import Link from "next/link";
 import { authorName, authorUrl, getStore, sameAsUrls, siteDescription, siteName, siteUrl } from "../lib/site.ts";
 import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
 import { parseCategory, parseVersion, splitPosts } from "../lib/changelog.ts";
+import { postPath, postsAtRoot } from "../lib/scatterpost/post-paths.ts";
 
 const CATEGORY_LABEL = { new: "New", improved: "Improved", fixed: "Fixed" } as const;
 
@@ -12,7 +13,9 @@ function formatDate(date: string): string {
 export default async function HomePage() {
   const { blogPosts, changelogPosts } = splitPosts(await getStore().list());
   const latestChangelog = changelogPosts.slice(0, 3);
-  const latestBlog = blogPosts.slice(0, 3);
+  // With posts at the root, /blog redirects here, so this page carries
+  // every article rather than the latest three.
+  const latestBlog = postsAtRoot() ? blogPosts : blogPosts.slice(0, 3);
   const site = siteUrl();
 
   const sameAs = sameAsUrls();
@@ -88,10 +91,12 @@ export default async function HomePage() {
 
           <section>
             <div className="flex items-baseline justify-between">
-              <h2 className="text-xl">Latest articles</h2>
-              <Link href="/blog" className="tap-target muted-link">
-                All articles
-              </Link>
+              <h2 className="text-xl">{postsAtRoot() ? "Articles" : "Latest articles"}</h2>
+              {postsAtRoot() ? null : (
+                <Link href="/blog" className="tap-target muted-link">
+                  All articles
+                </Link>
+              )}
             </div>
             {latestBlog.length === 0 ? (
               <p className="post-list-meta">No articles yet.</p>
@@ -99,7 +104,7 @@ export default async function HomePage() {
               <ul className="post-list">
                 {latestBlog.map((post) => (
                   <li key={post.slug} className="post-list-row">
-                    <Link href={`/blog/${post.slug}`} className="post-list-title">
+                    <Link href={postPath(post.slug)} className="post-list-title">
                       {post.title}
                     </Link>
                     <p className="post-list-meta">

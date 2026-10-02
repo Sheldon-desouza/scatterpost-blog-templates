@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getStore, siteName, siteUrl } from "../../../lib/site.ts";
+import { getStore, postUrl, siteName, siteUrl } from "../../../lib/site.ts";
 import { isValidSlug, serialiseJsonLd } from "../../../lib/scatterpost/safe-html.ts";
 import { collectTags, postsForTagSlug, tagNameForSlug } from "../../../lib/tags.ts";
 import { PostCard } from "../../../components/post-card.tsx";
@@ -57,7 +57,7 @@ export default async function TagPage({ params }: PageProps) {
       itemListElement: matches.map((post, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        url: post.canonical ?? `${site}/blog/${post.slug}`,
+        url: post.canonical ?? postUrl(post.slug),
         name: post.title,
       })),
     },

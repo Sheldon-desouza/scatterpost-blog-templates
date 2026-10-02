@@ -5,6 +5,8 @@ import { serialiseJsonLd } from "../lib/scatterpost/safe-html.ts";
 import { readingTime } from "../lib/reading-time.ts";
 import { BIO, SOCIAL_LINKS } from "../lib/config.ts";
 import { PostIndex } from "../components/PostIndex.tsx";
+import { postPath } from "../lib/scatterpost/post-paths.ts";
+import { withBasePath } from "../lib/scatterpost/post-paths.ts";
 
 export default async function HomePage() {
   const posts = await getStore().list();
@@ -32,7 +34,7 @@ export default async function HomePage() {
         {SOCIAL_LINKS.length > 0 ? (
           <nav className="home-links" aria-label="Elsewhere">
             {SOCIAL_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className="tap-target">
+              <a key={link.href} href={withBasePath(link.href)} className="tap-target">
                 {link.label}
               </a>
             ))}
@@ -55,7 +57,7 @@ export default async function HomePage() {
         <>
           {featured ? (
             <Link
-              href={`/blog/${featured.slug}`}
+              href={postPath(featured.slug)}
               className={`featured-post${featured.cover ? " featured-post-with-cover" : ""}`}
             >
               {featured.cover ? (
