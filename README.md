@@ -24,8 +24,8 @@ your site.
 
 ## Preview
 
-Demos go live once each template is deployed to `demo.scatterpost.io`;
-until then the links below may 404.
+Try every template live in the [demo gallery](https://demo.scatterpost.io/):
+each demo runs on sample posts so you can click around before you deploy.
 
 <table>
   <tr>
