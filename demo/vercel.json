@@ -3,12 +3,12 @@
   "rewrites": [
     { "source": "/minimal", "destination": "https://REPLACE-minimal-demo.vercel.app/minimal" },
     { "source": "/minimal/:path*", "destination": "https://REPLACE-minimal-demo.vercel.app/minimal/:path*" },
-    { "source": "/developer", "destination": "https://REPLACE-developer-demo.vercel.app/developer" },
-    { "source": "/developer/:path*", "destination": "https://REPLACE-developer-demo.vercel.app/developer/:path*" },
-    { "source": "/magazine", "destination": "https://REPLACE-magazine-demo.vercel.app/magazine" },
-    { "source": "/magazine/:path*", "destination": "https://REPLACE-magazine-demo.vercel.app/magazine/:path*" },
-    { "source": "/changelog", "destination": "https://REPLACE-changelog-demo.vercel.app/changelog" },
-    { "source": "/changelog/:path*", "destination": "https://REPLACE-changelog-demo.vercel.app/changelog/:path*" }
+    { "source": "/developer", "destination": "https://scatterpost-developer-demo.vercel.app/developer" },
+    { "source": "/developer/:path*", "destination": "https://scatterpost-developer-demo.vercel.app/developer/:path*" },
+    { "source": "/magazine", "destination": "https://scatterpost-magazine-demo.vercel.app/magazine" },
+    { "source": "/magazine/:path*", "destination": "https://scatterpost-magazine-demo.vercel.app/magazine/:path*" },
+    { "source": "/changelog", "destination": "https://scatterpost-changelog-demo.vercel.app/changelog" },
+    { "source": "/changelog/:path*", "destination": "https://scatterpost-changelog-demo.vercel.app/changelog/:path*" }
   ],
   "headers": [
     {
