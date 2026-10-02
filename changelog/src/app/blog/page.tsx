@@ -5,32 +5,40 @@ import { splitPosts } from "../../lib/changelog.ts";
 
 export const metadata: Metadata = {
   title: "Blog",
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "blog" },
 };
+
+function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+}
 
 export default async function BlogIndexPage() {
   const { blogPosts: posts } = splitPosts(await getStore().list());
 
   return (
-    <div className="measure flex flex-col gap-6">
-      <h1 className="text-3xl font-semibold">Blog</h1>
-      {posts.length === 0 ? (
-        <p className="text-[var(--muted-foreground)]">
-          No articles yet. Connect {siteName()} to scatterpost to publish the first one.
+    <div className="measure">
+      <div className="page-header">
+        <h1>Blog</h1>
+        <p className="subscribe-row">
+          <Link href="/feed.xml">RSS</Link>
         </p>
+      </div>
+      {posts.length === 0 ? (
+        <div className="empty-state">
+          <h2>No articles yet</h2>
+          <p>Connect {siteName()} to scatterpost to publish the first one.</p>
+        </div>
       ) : (
-        <ul className="flex flex-col gap-6">
+        <ul className="post-list">
           {posts.map((post) => (
-            <li key={post.slug} className="border-b border-[var(--border)] pb-6">
-              <Link href={`/blog/${post.slug}`} className="text-lg font-medium underline">
+            <li key={post.slug} className="post-list-row">
+              <Link href={`/blog/${post.slug}`} className="post-list-title">
                 {post.title}
               </Link>
-              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                <time dateTime={post.date}>
-                  {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
-                </time>
+              <p className="post-list-meta">
+                <time dateTime={post.date}>{formatDate(post.date)}</time>
               </p>
-              {post.description ? <p className="mt-2">{post.description}</p> : null}
+              {post.description ? <p className="post-list-summary">{post.description}</p> : null}
             </li>
           ))}
         </ul>

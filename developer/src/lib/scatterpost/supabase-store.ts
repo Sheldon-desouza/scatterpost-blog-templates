@@ -16,6 +16,7 @@ interface PostRow {
   tags: string[];
   canonical: string | null;
   cover: string | null;
+  cover_alt: string | null;
   body_markdown: string;
 }
 
@@ -29,6 +30,7 @@ function toStoredPost(row: PostRow): StoredPost {
     tags: row.tags,
     canonical: row.canonical ?? undefined,
     cover: row.cover ?? undefined,
+    coverAlt: row.cover_alt ?? undefined,
     bodyMarkdown: row.body_markdown,
   };
 }
@@ -43,6 +45,7 @@ function toRow(post: StoredPost): PostRow {
     tags: post.tags,
     canonical: post.canonical ?? null,
     cover: post.cover ?? null,
+    cover_alt: post.coverAlt ?? null,
     body_markdown: post.bodyMarkdown,
   };
 }

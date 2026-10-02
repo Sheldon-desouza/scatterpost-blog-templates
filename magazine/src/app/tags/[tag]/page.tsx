@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const name = tagNameForSlug(posts, tag);
   return {
     title: `Posts tagged "${name}"`,
-    alternates: { canonical: `/tags/${tag}` },
+    alternates: { canonical: `tags/${tag}` },
   };
 }
 
@@ -64,11 +64,9 @@ export default async function TagPage({ params }: PageProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="font-display text-3xl font-semibold">
-        Posts tagged &quot;{name}&quot;
-      </h1>
-      <div className="card-grid">
+    <div className="index-page">
+      <h1 className="index-page-heading">Posts tagged &quot;{name}&quot;</h1>
+      <div className="story-grid">
         {matches.map((post) => (
           <PostCard key={post.slug} post={post} />
         ))}

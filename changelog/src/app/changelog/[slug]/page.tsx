@@ -1,13 +1,17 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { authorName, authorUrl, changelogUrl, getStore, siteName, siteUrl } from "../../../lib/site.ts";
 import { renderMarkdown } from "../../../lib/scatterpost/render-markdown.ts";
 import { isValidSlug, serialiseJsonLd } from "../../../lib/scatterpost/safe-html.ts";
-import { isChangelogPost, parseVersion } from "../../../lib/changelog.ts";
+import { isChangelogPost, parseCategory, parseVersion, splitPosts } from "../../../lib/changelog.ts";
+import { CodeBlocks } from "../../../components/CodeBlocks.tsx";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
+
+const CATEGORY_LABEL = { new: "New", improved: "Improved", fixed: "Fixed" } as const;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -28,13 +32,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: "article",
       publishedTime: post.date,
       tags: post.tags,
+      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
+      images: post.cover ? [{ url: post.cover, ...(post.coverAlt ? { alt: post.coverAlt } : {}) }] : undefined,
     },
   };
+}
+
+function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default async function ChangelogEntryPage({ params }: PageProps) {
@@ -45,15 +55,22 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
   if (!isValidSlug(slug)) {
     notFound();
   }
-  const post = await getStore().get(slug);
+  const { changelogPosts } = splitPosts(await getStore().list());
+  const index = changelogPosts.findIndex((candidate) => candidate.slug === slug);
+  const post = index === -1 ? await getStore().get(slug) : changelogPosts[index];
   if (!post || !isChangelogPost(post)) {
     notFound();
   }
+  // Newest first: the next item in the array is older (prev), the
+  // previous item is newer (next).
+  const previousEntry = index > -1 ? changelogPosts[index + 1] : undefined;
+  const nextEntry = index > 0 ? changelogPosts[index - 1] : undefined;
 
   const canonical = post.canonical ?? changelogUrl(post.slug);
   const html = renderMarkdown(post.bodyMarkdown);
   const site = siteUrl();
   const version = parseVersion(post.title);
+  const category = parseCategory(post.tags);
 
   const author = authorUrl()
     ? { "@type": "Person", name: authorName(), url: authorUrl() }
@@ -89,16 +106,59 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
   return (
     <div className="measure flex flex-col gap-4">
       <article>
-        <h1 className="text-3xl font-semibold">
-          {version ? <span className="mr-2 font-mono text-xl text-[var(--muted-foreground)]">{version}</span> : null}
-          {post.title}
-        </h1>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-          <time dateTime={post.date}>
-            {new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}
+        <p className="entry-kicker">
+          <time dateTime={post.date} className="timeline-date">
+            {formatDate(post.date)}
           </time>
+          {version ? <span className="version-badge">{version}</span> : null}
+          {category ? (
+            <span className={`category-pill category-pill-${category}`}>{CATEGORY_LABEL[category]}</span>
+          ) : null}
         </p>
-        <div className="prose mt-6 max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
+        <h1 className="entry-h1">{post.title}</h1>
+        <p className="entry-byline">
+          By{" "}
+          {authorUrl() ? (
+            <a href={authorUrl()} rel="author">
+              {authorName()}
+            </a>
+          ) : (
+            authorName()
+          )}
+        </p>
+        {post.cover ? (
+          <p className="entry-cover">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={post.cover} alt={post.coverAlt ?? post.title} width={1200} height={630} />
+          </p>
+        ) : null}
+        <div className="prose mt-10" dangerouslySetInnerHTML={{ __html: html }} />
+        <CodeBlocks />
+
+        {previousEntry || nextEntry ? (
+          <nav className="post-footer-nav" aria-label="More changelog entries">
+            {previousEntry ? (
+              <Link href={`/changelog/${previousEntry.slug}`} className="prev">
+                <span className="label">Previous</span>
+                <span className="title">{previousEntry.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+            {nextEntry ? (
+              <Link href={`/changelog/${nextEntry.slug}`} className="next">
+                <span className="label">Next</span>
+                <span className="title">{nextEntry.title}</span>
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        ) : null}
+
+        <p className="subscribe-line">
+          Subscribe over <Link href="/changelog/feed.xml">RSS</Link>.
+        </p>
       </article>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serialiseJsonLd(breadcrumbJsonLd) }} />

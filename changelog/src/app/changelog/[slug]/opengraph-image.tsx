@@ -11,9 +11,11 @@ interface ImageProps {
 }
 
 /**
- * A plain text card on a solid background: the version label (if the
- * title has one), the entry's title, and the site name underneath. No
+ * A plain card on a solid background: the version badge (if the title
+ * has one), the date, the entry's title and the site name. No
  * photography, no gradient, no emoji, so it reads cleanly at any size.
+ * Always the light palette (the platforms that embed this image don't
+ * honour a reader's dark mode).
  */
 export default async function OpengraphImage({ params }: ImageProps) {
   const { slug } = await params;
@@ -22,6 +24,9 @@ export default async function OpengraphImage({ params }: ImageProps) {
   const post = isValidSlug(slug) ? await getStore().get(slug) : null;
   const title = post?.title ?? siteName();
   const version = post ? parseVersion(post.title) : undefined;
+  const date = post?.date
+    ? new Date(post.date).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })
+    : undefined;
 
   return new ImageResponse(
     (
@@ -31,17 +36,32 @@ export default async function OpengraphImage({ params }: ImageProps) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: "space-between",
           padding: "80px",
           background: "#ffffff",
-          color: "#101828",
+          color: "#111113",
         }}
       >
-        {version ? (
-          <div style={{ fontSize: 28, fontWeight: 600, color: "#2554ea", marginBottom: 16 }}>{version}</div>
-        ) : null}
-        <div style={{ fontSize: 56, fontWeight: 600, lineHeight: 1.3 }}>{title}</div>
-        <div style={{ marginTop: 40, fontSize: 28, color: "#55617a" }}>{siteName()}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {version ? (
+            <div
+              style={{
+                display: "flex",
+                fontSize: 24,
+                fontWeight: 600,
+                color: "#5b4bdb",
+                border: "2px solid #e7e7ea",
+                borderRadius: 999,
+                padding: "8px 20px",
+              }}
+            >
+              {version}
+            </div>
+          ) : null}
+          {date ? <div style={{ fontSize: 24, color: "#5b5b66" }}>{date}</div> : null}
+        </div>
+        <div style={{ fontSize: 56, fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.01em" }}>{title}</div>
+        <div style={{ fontSize: 28, fontWeight: 500, color: "#5b5b66" }}>{siteName()}</div>
       </div>
     ),
     { ...size },

@@ -4,7 +4,7 @@ import { PostIndex } from "../../components/PostIndex.tsx";
 
 export const metadata: Metadata = {
   title: "Writing",
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "blog" },
 };
 
 export default async function BlogIndexPage() {

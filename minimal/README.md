@@ -176,6 +176,18 @@ run against this folder alone; it has its own `package-lock.json` and no
 `@scatterpost/*` dependency, so `npm install` works from a plain copy of
 this folder with nothing else present.
 
+## Demo mode
+
+None of this is needed to run your own blog; it exists so this template
+can also serve as a live demo. Set `NEXT_PUBLIC_BASE_PATH` (e.g.
+`/minimal`) to serve it under a path on another domain,
+`NEXT_PUBLIC_DEMO_TEMPLATE` (e.g. `"Minimal"`) to show a slim bar above
+the header linking back to a one-click deploy and to the template
+gallery, and `NEXT_PUBLIC_DEMO_SEED_CONTENT=true` to also list the
+sample posts committed under `demo-content/posts` alongside
+`content/posts`. See `.env.example` for the full set and their
+defaults.
+
 ## Keeping the connector code in sync
 
 The scatterpost connector code under `src/lib/scatterpost/` is a copy of

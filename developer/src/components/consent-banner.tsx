@@ -38,32 +38,22 @@ export function ConsentBanner() {
   }
 
   return (
-    <div
-      role="region"
-      aria-label="Cookie choices"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border)] bg-[var(--surface)] p-4"
-    >
-      <div className="mx-auto flex max-w-2xl flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          This site uses Google Analytics to understand how it is read. No tracking cookie is set unless you
-          accept.
-        </p>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => choose("denied")}
-            className="tap-target rounded border border-[var(--border)] px-4"
-          >
-            Decline
-          </button>
-          <button
-            type="button"
-            onClick={() => choose("granted")}
-            className="tap-target rounded bg-[var(--accent)] px-4 text-[var(--accent-foreground)]"
-          >
-            Accept
-          </button>
-        </div>
+    <div role="region" aria-label="Cookie choices" className="consent-banner">
+      <p>
+        This site uses Google Analytics to understand how it is read. No tracking cookie is set unless you
+        accept.
+      </p>
+      <div className="consent-actions">
+        <button type="button" onClick={() => choose("denied")} className="tap-target consent-button">
+          Decline
+        </button>
+        <button
+          type="button"
+          onClick={() => choose("granted")}
+          className="tap-target consent-button consent-button-accept"
+        >
+          Accept
+        </button>
       </div>
     </div>
   );
@@ -77,11 +67,7 @@ export function CookieSettingsLink() {
   if (!isValidGaMeasurementId(measurementId)) return null;
 
   return (
-    <button
-      type="button"
-      onClick={() => requestReopenConsentBanner()}
-      className="underline"
-    >
+    <button type="button" onClick={() => requestReopenConsentBanner()} className="cookie-settings-link">
       Cookie settings
     </button>
   );

@@ -3,7 +3,7 @@ import type { TocItem } from "../lib/render-post-html.ts";
 /**
  * Server-rendered: a native `<details>` needs no JavaScript to be
  * collapsible on a narrow screen, and `globals.css` forces it open and
- * hides the toggle at the `lg` layout, where it becomes the sticky
+ * hides the toggle at 1280px and up, where it becomes the sticky
  * sidebar instead.
  */
 export function TableOfContents({ items }: { items: TocItem[] }) {

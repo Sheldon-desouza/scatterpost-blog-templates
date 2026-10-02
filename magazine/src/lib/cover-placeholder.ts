@@ -1,34 +1,23 @@
 /**
- * A tasteful generated placeholder for a post with no cover image, so
- * the card grid and the featured slot never show a broken image. The
- * gradient's two hues are derived from the post's own title with a
- * small, deterministic hash, so the same post always gets the same
- * placeholder and different posts tend to look different from one
- * another without any image at all.
+ * The placeholder shown in a cover's frame when a post has no
+ * `coverImageUrl`: a solid block with the first letter of the post's
+ * title set large and centred over it, in the surface colour itself,
+ * never a stock photo or a decorative gradient. Deliberately plain, so
+ * a reader can tell at a glance that no cover was supplied rather than
+ * mistaking the placeholder for art direction. The kicker already
+ * repeats just below every card, so the placeholder itself no longer
+ * shows it too.
  */
-function hashTitle(title: string): number {
-  let hash = 0;
-  for (let i = 0; i < title.length; i += 1) {
-    hash = (hash * 31 + title.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash);
-}
-
 export interface CoverPlaceholder {
-  /** CSS `background` value: a two-stop linear gradient. */
-  background: string;
-  /** One or two words from the title, shown over the gradient. */
-  label: string;
+  /** The single, uppercased first letter of the post's title, shown
+   * large and centred over the surface block. */
+  letter: string;
 }
 
 export function coverPlaceholder(title: string): CoverPlaceholder {
-  const hash = hashTitle(title || "Untitled");
-  const hueA = hash % 360;
-  const hueB = (hueA + 48) % 360;
-  const background = `linear-gradient(135deg, hsl(${hueA} 55% 42%), hsl(${hueB} 60% 28%))`;
-
-  const words = title.trim().split(/\s+/).filter(Boolean);
-  const label = words.slice(0, 3).join(" ") || "Untitled";
-
-  return { background, label };
+  // `[...string]` rather than `string[0]`, so a title starting with a
+  // surrogate pair (an emoji, say) still yields one whole character
+  // rather than half of one.
+  const firstCharacter = [...title.trim()][0];
+  return { letter: firstCharacter ? firstCharacter.toUpperCase() : "?" };
 }

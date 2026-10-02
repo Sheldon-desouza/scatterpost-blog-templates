@@ -3,9 +3,12 @@
  * fails with a clear message the first time it is needed, rather than as
  * `undefined` reaching a URL or a signature check.
  */
+import path from "node:path";
 import { BlobStore } from "./scatterpost/blob-store.ts";
 import { FileStore } from "./scatterpost/file-store.ts";
 import { SupabaseStore } from "./scatterpost/supabase-store.ts";
+import { DemoContentStore } from "./scatterpost/demo-content-store.ts";
+import { demoSeedContent } from "./demo.ts";
 import type { ContentStore } from "./scatterpost/content-store.ts";
 
 /**
@@ -93,7 +96,7 @@ export function bingSiteVerification(): string | undefined {
  * (meaning a Blob store is connected), otherwise `"file"`. See
  * `supabase/posts.sql` for the table `"supabase"` expects.
  */
-export function getStore(): ContentStore {
+function buildStore(): ContentStore {
   const kind = process.env.CONTENT_STORE || (process.env.BLOB_READ_WRITE_TOKEN ? "blob" : "file");
   if (kind === "blob") {
     return new BlobStore();
@@ -110,6 +113,22 @@ export function getStore(): ContentStore {
     throw new Error(`Unknown CONTENT_STORE "${kind}", expected "blob", "file" or "supabase".`);
   }
   return new FileStore();
+}
+
+/**
+ * The real store, plus, only while `NEXT_PUBLIC_DEMO_SEED_CONTENT` is
+ * `"true"`, the committed demo posts under `demo-content/posts`,
+ * read-only and listed alongside whatever the real store holds. Unset
+ * (the default, and what a founder's own deploy leaves it as), this is
+ * exactly `buildStore()`.
+ */
+export function getStore(): ContentStore {
+  const store = buildStore();
+  if (!demoSeedContent()) {
+    return store;
+  }
+  const demoStore = new FileStore(path.join(process.cwd(), "demo-content", "posts"));
+  return new DemoContentStore(store, demoStore);
 }
 
 export function webhookSecret(): string {

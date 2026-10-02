@@ -16,6 +16,7 @@ export interface StoredPost {
   tags: string[];
   canonical?: string;
   cover?: string;
+  coverAlt?: string;
   bodyMarkdown: string;
 }
 
