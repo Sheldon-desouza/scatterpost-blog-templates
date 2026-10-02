@@ -63,3 +63,19 @@ export function reservedSlugsFor(topLevelRoutes: readonly string[]): ReadonlySet
   }
   return new Set([...BASE_RESERVED_SLUGS, ...topLevelRoutes]);
 }
+
+/**
+ * `next/link` and `next/image` add `NEXT_PUBLIC_BASE_PATH` themselves;
+ * a plain `<a href>` or `<img src>` does not. Prefixes a root-relative
+ * path (`/feed.xml`, `/me.jpg`) with the base path so it still lands
+ * inside the site when it is served under one (e.g. example.com/blog).
+ * Absolute URLs, protocol-relative URLs and `#` or relative values pass
+ * through untouched.
+ */
+export function withBasePath(href: string): string {
+  if (!href.startsWith("/") || href.startsWith("//")) {
+    return href;
+  }
+  const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/+$/, "");
+  return `${basePath}${href}`;
+}

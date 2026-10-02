@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { BASE_RESERVED_SLUGS, postPath, postsAtRoot, postsIndexPath, reservedSlugsFor } from "./post-paths.ts";
+import { BASE_RESERVED_SLUGS, postPath, postsAtRoot, postsIndexPath, reservedSlugsFor, withBasePath } from "./post-paths.ts";
 
 describe("post paths (NEXT_PUBLIC_POSTS_AT_ROOT)", () => {
   const original = process.env.NEXT_PUBLIC_POSTS_AT_ROOT;
@@ -45,5 +45,34 @@ describe("post paths (NEXT_PUBLIC_POSTS_AT_ROOT)", () => {
     }
     expect(reserved.has("custom")).toBe(true);
     expect(reserved.has("hello-world")).toBe(false);
+  });
+});
+
+describe("withBasePath (plain <a> and <img> under NEXT_PUBLIC_BASE_PATH)", () => {
+  const original = process.env.NEXT_PUBLIC_BASE_PATH;
+
+  afterEach(() => {
+    if (original === undefined) {
+      delete process.env.NEXT_PUBLIC_BASE_PATH;
+    } else {
+      process.env.NEXT_PUBLIC_BASE_PATH = original;
+    }
+  });
+
+  it("prefixes a root-relative path with the base path", () => {
+    process.env.NEXT_PUBLIC_BASE_PATH = "/blog";
+    expect(withBasePath("/feed.xml")).toBe("/blog/feed.xml");
+  });
+
+  it("leaves the path alone when no base path is set", () => {
+    delete process.env.NEXT_PUBLIC_BASE_PATH;
+    expect(withBasePath("/feed.xml")).toBe("/feed.xml");
+  });
+
+  it("passes absolute, protocol-relative and fragment URLs through", () => {
+    process.env.NEXT_PUBLIC_BASE_PATH = "/blog";
+    expect(withBasePath("https://github.com")).toBe("https://github.com");
+    expect(withBasePath("//cdn.example.com/a.png")).toBe("//cdn.example.com/a.png");
+    expect(withBasePath("#main-content")).toBe("#main-content");
   });
 });
