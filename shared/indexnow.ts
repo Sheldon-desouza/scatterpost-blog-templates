@@ -4,7 +4,7 @@
  * (and the AI assistants it feeds) can pick up a new post sooner than
  * its next crawl. `INDEXNOW_KEY` is the only configuration: when unset
  * or malformed, `pingIndexNow` does nothing, and the `/{key}.txt` route
- * (`src/app/[key]/route.ts`) 404s.
+ * (`src/app/api/indexnow-key/[key]/route.ts`) 404s.
  *
  * Never awaited by a caller and never throws: a publish has already
  * succeeded by the time this runs, so a failed or slow ping must not
