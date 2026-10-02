@@ -102,4 +102,19 @@ describe("FileStore", () => {
   it("rejects an empty or invalid slug before writing (security review M1)", async () => {
     await expect(store.save(post({ slug: "" }))).rejects.toThrow(/invalid slug/);
   });
+
+  it("round trips a cover and its coverAlt", async () => {
+    await store.save(post({ cover: "https://example.com/cover.png", coverAlt: "A chart of launch day traffic." }));
+
+    const fetched = await store.get("hello-world");
+    expect(fetched?.cover).toBe("https://example.com/cover.png");
+    expect(fetched?.coverAlt).toBe("A chart of launch day traffic.");
+  });
+
+  it("leaves coverAlt undefined when a post has no cover", async () => {
+    await store.save(post());
+
+    const fetched = await store.get("hello-world");
+    expect(fetched?.coverAlt).toBeUndefined();
+  });
 });

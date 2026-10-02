@@ -12,6 +12,7 @@ create table if not exists posts (
   tags text[] not null default '{}',
   canonical text,
   cover text,
+  cover_alt text,
   body_markdown text not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

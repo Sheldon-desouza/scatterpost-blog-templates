@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { groupByMonth, isChangelogPost, parseVersion, splitPosts } from "./changelog.ts";
+import { groupByMonth, isChangelogPost, parseCategory, parseVersion, splitPosts } from "./changelog.ts";
 
 describe("isChangelogPost", () => {
   it("is true when tags include \"changelog\"", () => {
@@ -55,6 +55,26 @@ describe("parseVersion", () => {
 
   it("does not match a version in the middle of the title", () => {
     expect(parseVersion("Shipping v1.2.0 today")).toBeUndefined();
+  });
+});
+
+describe("parseCategory", () => {
+  it("matches \"new\", case-insensitively", () => {
+    expect(parseCategory(["changelog", "New"])).toBe("new");
+  });
+
+  it("matches \"improved\" and the \"improvement\" synonym", () => {
+    expect(parseCategory(["changelog", "improved"])).toBe("improved");
+    expect(parseCategory(["changelog", "Improvement"])).toBe("improved");
+  });
+
+  it("matches \"fixed\" and the \"fix\" synonym", () => {
+    expect(parseCategory(["changelog", "fixed"])).toBe("fixed");
+    expect(parseCategory(["changelog", "Fix"])).toBe("fixed");
+  });
+
+  it("returns undefined when no tag matches a category", () => {
+    expect(parseCategory(["changelog", "scatterpost"])).toBeUndefined();
   });
 });
 

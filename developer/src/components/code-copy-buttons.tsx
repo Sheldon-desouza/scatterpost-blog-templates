@@ -7,22 +7,23 @@ import { useEffect } from "react";
  * page. The post body arrives as sanitised HTML from `renderPostHtml`
  * (via `dangerouslySetInnerHTML`), not as React elements, so the
  * button can't be rendered inline server-side; this client component
- * attaches one to each `pre.shiki` after the post mounts instead.
+ * attaches one to each `.code-block` (already wrapped, with its
+ * filename-or-language tab, by `renderPostHtml`) after the post mounts
+ * instead.
  */
 export function CodeCopyButtons() {
   useEffect(() => {
-    const blocks = Array.from(document.querySelectorAll<HTMLPreElement>(".prose pre.shiki"));
+    const blocks = Array.from(document.querySelectorAll<HTMLDivElement>(".prose .code-block"));
     const cleanups: Array<() => void> = [];
 
-    for (const pre of blocks) {
-      if (pre.parentElement?.classList.contains("code-block")) {
+    for (const wrapper of blocks) {
+      if (wrapper.dataset.copyEnhanced) {
         continue;
       }
+      wrapper.dataset.copyEnhanced = "true";
 
-      const wrapper = document.createElement("div");
-      wrapper.className = "code-block";
-      pre.replaceWith(wrapper);
-      wrapper.appendChild(pre);
+      const pre = wrapper.querySelector("pre.shiki");
+      if (!pre) continue;
 
       const button = document.createElement("button");
       button.type = "button";

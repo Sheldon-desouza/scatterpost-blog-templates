@@ -5,6 +5,7 @@ import "./globals.css";
 import { authorName, bingSiteVerification, googleSiteVerification, siteName, siteUrl } from "../lib/site.ts";
 import { NAV_LINKS, showScatterpostBadge } from "../lib/config.ts";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
+import { DemoBar } from "../components/DemoBar.tsx";
 import { ConsentBanner, CookieSettingsLink } from "../components/consent-banner.tsx";
 import { SiteAnalytics } from "../components/site-analytics.tsx";
 
@@ -33,11 +34,11 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl()),
+  metadataBase: new URL(`${siteUrl()}/`),
   title: { default: siteName(), template: `%s | ${siteName()}` },
   description: `${siteName()}, a blog by ${authorName()}, published with scatterpost.`,
   alternates: {
-    types: { "application/rss+xml": [{ url: "/feed.xml", title: siteName() }] },
+    types: { "application/rss+xml": [{ url: "feed.xml", title: siteName() }] },
   },
   verification: {
     google: googleSiteVerification(),
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <div className="site-shell">
+          <DemoBar />
           <header className="site-header">
             <Link href="/" className="tap-target site-header-name">
               {siteName()}

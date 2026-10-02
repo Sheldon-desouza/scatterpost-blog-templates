@@ -61,6 +61,32 @@ function safeLanguage(lang: string | undefined): string {
   return SAFE_LANGUAGE.test(first) ? first : "";
 }
 
+/**
+ * A fenced block's info string can name a filename after the language
+ * (e.g. ```ts src/app.ts```), which the code tab shows instead of the
+ * bare language when present. Restricted to a safe, printable filename
+ * shape for the same reason as `safeLanguage`: this reaches the page as
+ * a plain text label, but it still should never carry markup or control
+ * characters through to the rendered HTML attribute.
+ */
+const SAFE_FILENAME = /^[A-Za-z0-9+#._/-]{1,80}$/;
+
+function safeFilename(lang: string | undefined): string {
+  const rest = (lang ?? "").trim().split(/\s+/).slice(1).join(" ");
+  return SAFE_FILENAME.test(rest) ? rest : "";
+}
+
+/**
+ * Escapes a value for use inside a double-quoted HTML attribute. The
+ * language and filename labels below are plain text, not markup, but
+ * are concatenated straight into the rendered HTML string rather than
+ * set through the DOM, so this closes off the same injection the rest
+ * of this file sanitises against.
+ */
+function escapeAttribute(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 async function highlight(code: string, lang: string): Promise<string> {
   try {
     return await codeToHtml(code, {
@@ -90,7 +116,7 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
     }
   }
 
-  const codeBlocks = new Map<string, { code: string; lang: string }>();
+  const codeBlocks = new Map<string, { code: string; lang: string; filename: string }>();
   let codeBlockIndex = 0;
   const headingSlugger = createSlugger();
 
@@ -107,14 +133,34 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
 
   renderer.code = function code(token: Tokens.Code): string {
     const id = `code-placeholder-${codeBlockIndex++}`;
-    codeBlocks.set(id, { code: token.text, lang: safeLanguage(token.lang) });
+    codeBlocks.set(id, { code: token.text, lang: safeLanguage(token.lang), filename: safeFilename(token.lang) });
     return `<div data-code-placeholder="${id}"></div>`;
+  };
+
+  // A blockquote whose first line reads "Note:" or "Warning:" becomes a
+  // tinted callout box instead of a plain quote: the label is lifted out
+  // of the paragraph into its own kicker, so the remaining text reads as
+  // the body of the note rather than repeating the word.
+  renderer.blockquote = function blockquote(token: Tokens.Blockquote): string {
+    const inner = this.parser.parse(token.tokens);
+    const match = inner.match(/^<p>(Note|Warning):\s*/);
+    if (!match) {
+      return `<blockquote>${inner}</blockquote>`;
+    }
+    const kind = match[1] === "Note" ? "note" : "warning";
+    const stripped = inner.replace(/^<p>(Note|Warning):\s*/, "<p>");
+    return `<div class="callout callout-${kind}"><p class="callout-label">${match[1]}</p>${stripped}</div>`;
   };
 
   let rendered = marked.parser(tokens, { renderer });
 
-  for (const [id, { code, lang }] of codeBlocks) {
+  for (const [id, { code, lang, filename }] of codeBlocks) {
     const highlighted = await highlight(code, lang);
+    const label = filename || lang;
+    const tab = label
+      ? `<div class="code-tab"><span class="code-tab-label">${escapeAttribute(label)}</span></div>`
+      : "";
+    const wrapped = `<div class="code-block"${lang ? ` data-lang="${escapeAttribute(lang)}"` : ""}${filename ? ` data-filename="${escapeAttribute(filename)}"` : ""}>${tab}${highlighted}</div>`;
     // A plain string second argument to `String.replace` treats `$&`,
     // `$1`, `` $` `` etc. in it as replacement patterns, not literal
     // text (security review L1): a code block whose highlighted output
@@ -123,11 +169,16 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
     // rendered HTML around it. A replacer function's return value is
     // always used verbatim.
     const placeholder = `<div data-code-placeholder="${id}"></div>`;
-    rendered = rendered.replace(placeholder, () => highlighted);
+    rendered = rendered.replace(placeholder, () => wrapped);
   }
 
   const html = sanitizeHtml(rendered, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
+    // `kbd` has no fenced-code or inline-markdown syntax of its own, so
+    // it only ever reaches a post through raw HTML scatterpost's render
+    // already allows through (see `renderMarkdown`'s own allowlist);
+    // listed here so the keyboard-key styling in globals.css has
+    // something to target rather than the tag being stripped.
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "kbd"]),
     allowedAttributes: {
       ...sanitizeHtml.defaults.allowedAttributes,
       img: ["src", "alt", "title"],
@@ -137,6 +188,8 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
       pre: ["class", "style", "tabindex"],
       code: ["class", "style"],
       span: ["class", "style"],
+      div: ["class", "data-lang", "data-filename"],
+      p: ["class"],
     },
     allowedStyles: {
       "*": {
@@ -164,7 +217,9 @@ export async function renderPostHtml(bodyMarkdown: string): Promise<RenderedPost
       a: ["heading-anchor"],
       pre: ["shiki", "shiki-themes", "github-light", "github-dark"],
       code: [],
-      span: ["line"],
+      span: ["line", "code-tab-label"],
+      div: ["code-block", "code-tab", "callout", "callout-note", "callout-warning"],
+      p: ["callout-label"],
     },
     // A raw `<a target="_blank">` shares `window.opener` with this page
     // unless `rel="noopener noreferrer"` is present; forced here rather

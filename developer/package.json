@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "description": "A dark-first Next.js blog template for a dev-tool founder, with syntax-highlighted code blocks and a table of contents, and the scatterpost website connector pre-wired. Self-contained: no dependency on any scatterpost package at runtime.",
+  "description": "An engineering-notebook Next.js blog template for a technical founder, with syntax-highlighted code blocks, a table of contents, tag pages and a theme toggle, and the scatterpost website connector pre-wired. Self-contained: no dependency on any scatterpost package at runtime.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -32,11 +32,13 @@ export default async function OpengraphImage({ params }: ImageProps) {
           justifyContent: "center",
           padding: "80px",
           background: "#ffffff",
-          color: "#101828",
+          color: "#111113",
         }}
       >
-        <div style={{ fontSize: 56, fontWeight: 600, lineHeight: 1.3 }}>{title}</div>
-        <div style={{ marginTop: 40, fontSize: 28, color: "#55617a" }}>{siteName()}</div>
+        <div style={{ fontSize: 24, fontWeight: 600, color: "#5b4bdb", letterSpacing: "-0.01em" }}>{siteName()}</div>
+        <div style={{ marginTop: 16, fontSize: 56, fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.01em" }}>
+          {title}
+        </div>
       </div>
     ),
     { ...size },

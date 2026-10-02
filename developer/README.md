@@ -1,11 +1,12 @@
 # Developer
 
-A dark-first Next.js blog for a dev-tool founder, built to connect
-straight to [scatterpost](https://scatterpost.io) as a Website channel.
-Syntax-highlighted code blocks with a copy button, a table of contents
-built from each post's headings, and a reading time estimate, on top
-of the same SEO and AI-search foundation every template here ships. It
-has no runtime dependency on any scatterpost package: the signature
+An engineering-notebook Next.js blog for a technical founder, built to
+connect straight to [scatterpost](https://scatterpost.io) as a Website
+channel. Syntax-highlighted code blocks with a filename-or-language tab
+and a copy button, a sticky table of contents on wide screens, tag
+pages, a system/light/dark theme toggle and a reading time estimate, on
+top of the same SEO and AI-search foundation every template here ships.
+It has no runtime dependency on any scatterpost package: the signature
 verification, payload validation and content stores it needs are
 self-contained under `src/lib/scatterpost/` (synced from this
 repository's `shared/` folder by `scripts/sync-shared.mjs`), so this
@@ -201,6 +202,18 @@ Body in Markdown.
 run against this folder alone; it has its own `package-lock.json` and no
 `@scatterpost/*` dependency, so `npm install` works from a plain copy of
 this folder with nothing else present.
+
+## Demo mode
+
+None of this is needed to run your own blog; it exists so this template
+can also serve as a live demo. Set `NEXT_PUBLIC_BASE_PATH` (e.g.
+`/developer`) to serve it under a path on another domain,
+`NEXT_PUBLIC_DEMO_TEMPLATE` (e.g. `"Developer"`) to show a slim bar above
+the header linking back to a one-click deploy and to the template
+gallery, and `NEXT_PUBLIC_DEMO_SEED_CONTENT=true` to also list the
+sample posts committed under `demo-content/posts` alongside
+`content/posts`. See `.env.example` for the full set and their
+defaults.
 
 ## Keeping the connector code in sync
 

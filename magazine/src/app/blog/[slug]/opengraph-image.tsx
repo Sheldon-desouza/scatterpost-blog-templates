@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getStore, siteName } from "../../../lib/site.ts";
-import { coverPlaceholder } from "../../../lib/cover-placeholder.ts";
 import { isValidSlug } from "../../../lib/scatterpost/safe-html.ts";
+import { kickerFor } from "../../../lib/kicker.ts";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -11,11 +11,11 @@ interface ImageProps {
 }
 
 /**
- * The post's own generated placeholder gradient as the card background
- * (the same one the card grid falls back to when a post has no cover
- * image), with the title and site name set over it. Only used as the
- * Open Graph image fallback when a post has no `cover`; a post that
- * does have one is referenced directly in its `BlogPosting` JSON-LD and
+ * A cover-style card: the deep red kicker, a big Newsreader headline,
+ * and the site name underneath, on the dark ink background that gives
+ * every post its cover treatment even when it has no `cover` image of
+ * its own. Only used as the Open Graph image fallback; a post that does
+ * have a cover is referenced directly in its `BlogPosting` JSON-LD and
  * Open Graph meta instead.
  */
 export default async function OpengraphImage({ params }: ImageProps) {
@@ -24,7 +24,7 @@ export default async function OpengraphImage({ params }: ImageProps) {
   // invalid slug never even reaches the store.
   const post = isValidSlug(slug) ? await getStore().get(slug) : null;
   const title = post?.title ?? siteName();
-  const placeholder = coverPlaceholder(title);
+  const kicker = post ? kickerFor(post) : "Dispatch";
 
   return new ImageResponse(
     (
@@ -34,14 +34,17 @@ export default async function OpengraphImage({ params }: ImageProps) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           padding: "80px",
-          background: placeholder.background,
-          color: "#fdfcfb",
+          background: "#141414",
+          color: "#f0f0ee",
         }}
       >
-        <div style={{ fontSize: 56, fontWeight: 600, lineHeight: 1.3 }}>{title}</div>
-        <div style={{ marginTop: 40, fontSize: 28, opacity: 0.85 }}>{siteName()}</div>
+        <div style={{ fontSize: 24, fontWeight: 600, color: "#ff8a7a", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          {kicker}
+        </div>
+        <div style={{ fontSize: 60, fontWeight: 600, lineHeight: 1.2 }}>{title}</div>
+        <div style={{ fontSize: 26, color: "#a8a8a4" }}>{siteName()}</div>
       </div>
     ),
     { ...size },

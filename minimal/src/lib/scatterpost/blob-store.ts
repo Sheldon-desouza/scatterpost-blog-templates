@@ -25,6 +25,7 @@ interface FrontMatter {
   tags?: string[];
   canonical?: string;
   cover?: string;
+  coverAlt?: string;
   scatterpostId?: string;
 }
 
@@ -44,6 +45,7 @@ function toStoredPost(slugFromPathname: string, raw: string): StoredPost {
     tags: frontMatter.tags ?? [],
     canonical: orUndefined(frontMatter.canonical),
     cover: orUndefined(frontMatter.cover),
+    coverAlt: orUndefined(frontMatter.coverAlt),
     bodyMarkdown: content.trim(),
   };
 }
@@ -58,6 +60,7 @@ function toBlobContents(post: StoredPost): string {
     scatterpostId: post.scatterpostId,
     ...(post.canonical ? { canonical: post.canonical } : {}),
     ...(post.cover ? { cover: post.cover } : {}),
+    ...(post.coverAlt ? { coverAlt: post.coverAlt } : {}),
   };
   return matter.stringify(post.bodyMarkdown, frontMatter);
 }

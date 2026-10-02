@@ -73,6 +73,7 @@ export async function POST(request: Request): Promise<Response> {
     tags: payload.tags,
     canonical: payload.canonicalUrl,
     cover: payload.coverImageUrl,
+    coverAlt: payload.coverImageAlt,
     bodyMarkdown: payload.bodyMarkdown,
   });
 
