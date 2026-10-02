@@ -7,11 +7,10 @@ tags: ["changelog", "new", "sample-entry"]
 scatterpostId: "demo-free-templates-and-easier-sign-in"
 ---
 
-Sample entry, adapted from scatterpost's own public changelog, shown here to demonstrate this template's `/changelog` timeline.
+Sample entry describing scatterpost, shown here to demonstrate this template's `/changelog` timeline.
 
 Four free blog templates, a sign-in code that works in any browser, and a guide for connecting the site you already have.
 
-- Four free, open blog templates (minimal, developer, magazine and changelog) for founders who do not have a blog yet, each ready to deploy in one click.
-- Signing in now works with an emailed one-time code as well as a magic link, so it works in any browser.
-- A new guide shows how to connect the site you already have, including WordPress, Webflow and Ghost sites.
-- Security improvements to sign-in.
+- Four free blog templates (minimal, developer, magazine and changelog) for founders without a blog yet, pre-configured for AI and search and ready to deploy in one click.
+- Sign in with a code sent to your email, as well as a link, so it works in any browser.
+- A new guide for connecting the site you already have, including WordPress, Webflow and Ghost.

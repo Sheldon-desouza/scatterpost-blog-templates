@@ -7,10 +7,10 @@ tags: ["changelog", "new", "sample-entry"]
 scatterpostId: "demo-first-production-release"
 ---
 
-Sample entry, adapted from scatterpost's own public changelog, shown here to demonstrate this template's `/changelog` timeline.
+Sample entry describing scatterpost, shown here to demonstrate this template's `/changelog` timeline.
 
 scatterpost.io is live, showing a pre-launch page while sign-ups are not open yet.
 
 - scatterpost.io is live, with the publishing pipeline ready for launch.
 - Until sign-ups open, the site shows a pre-launch page.
-- Your AI assistant now gets clearer guidance from scatterpost, including what to do next when something goes wrong.
+- Your AI assistant gets clearer guidance from scatterpost, including a plain next step when something needs fixing.
