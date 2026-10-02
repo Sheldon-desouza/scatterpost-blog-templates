@@ -54,7 +54,8 @@ URLs once each template's own demo project is deployed:
 
 - `NEXT_PUBLIC_BASE_PATH=/<slug>` (e.g. `/minimal`)
 - `NEXT_PUBLIC_SITE_URL=https://demo.scatterpost.io/<slug>`
-- `NEXT_PUBLIC_DEMO_TEMPLATE=true`
+- `NEXT_PUBLIC_DEMO_TEMPLATE=<Display Name>` (for example `Minimal`; shown in the demo bar)
+- `NEXT_PUBLIC_DEMO_SEED_CONTENT=true` (shows the sample posts)
 
 ## Previews
 
