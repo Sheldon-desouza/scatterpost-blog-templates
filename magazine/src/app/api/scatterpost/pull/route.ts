@@ -11,6 +11,8 @@ import { after } from "next/server";
 import { getStore, postUrl, siteUrl } from "../../../../lib/site.ts";
 import { pullDuePublications } from "../../../../lib/scatterpost/pull.ts";
 import { pingIndexNow } from "../../../../lib/scatterpost/indexnow.ts";
+import { reservedSlugs } from "../../../../lib/top-level-routes.ts";
+import { postsIndexPath } from "../../../../lib/scatterpost/post-paths.ts";
 
 function hasValidCronSecret(request: Request): boolean {
   const header = request.headers.get("authorization") ?? "";
@@ -43,6 +45,7 @@ export async function GET(request: Request): Promise<Response> {
     apiKey,
     store: getStore(),
     buildUrl: postUrl,
+    reservedSlugs: reservedSlugs(),
     // Scheduled with `after` so it runs once this response has been
     // sent (security re-review LOW-2); fire-and-forget and never
     // throws synchronously either way (see indexnow.ts), so it can
@@ -53,7 +56,7 @@ export async function GET(request: Request): Promise<Response> {
   if (summary.published > 0) {
     // A pull run can publish several posts at once; revalidate the
     // shared pages once rather than per post.
-    revalidatePath("/blog", "page");
+    revalidatePath(postsIndexPath(), "page");
     revalidatePath("/", "page");
     revalidatePath("/tags", "layout");
     revalidatePath("/sitemap.xml");

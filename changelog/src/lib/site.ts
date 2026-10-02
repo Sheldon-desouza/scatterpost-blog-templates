@@ -10,6 +10,7 @@ import { SupabaseStore } from "./scatterpost/supabase-store.ts";
 import { DemoContentStore } from "./scatterpost/demo-content-store.ts";
 import { demoSeedContent } from "./demo.ts";
 import type { ContentStore } from "./scatterpost/content-store.ts";
+import { postPath } from "./scatterpost/post-paths.ts";
 
 /**
  * Falls back to `http://localhost:3000` when `NEXT_PUBLIC_SITE_URL` is
@@ -24,8 +25,13 @@ export function siteUrl(): string {
   return (url ?? "http://localhost:3000").replace(/\/+$/, "");
 }
 
+/**
+ * A post's absolute URL: `<site>/blog/<slug>` by default, or
+ * `<site>/<slug>` with NEXT_PUBLIC_POSTS_AT_ROOT=true (see
+ * scatterpost/post-paths.ts, the one place that decides the path).
+ */
 export function postUrl(slug: string): string {
-  return `${siteUrl()}/blog/${slug}`;
+  return `${siteUrl()}${postPath(slug)}`;
 }
 
 export function changelogUrl(slug: string): string {

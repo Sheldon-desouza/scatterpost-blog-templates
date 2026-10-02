@@ -5,6 +5,7 @@
  * footer credits scatterpost). Kept separate from `site.ts`, which only
  * reads `process.env`.
  */
+import { postsIndexPath } from "./scatterpost/post-paths.ts";
 
 export interface SiteLink {
   label: string;
@@ -13,7 +14,7 @@ export interface SiteLink {
 
 /** Shown in the header, next to the site name. Add or remove freely. */
 export const NAV_LINKS: SiteLink[] = [
-  { label: "Writing", href: "/blog" },
+  { label: "Writing", href: postsIndexPath() },
   { label: "Tags", href: "/tags" },
   { label: "RSS", href: "/feed.xml" },
 ];

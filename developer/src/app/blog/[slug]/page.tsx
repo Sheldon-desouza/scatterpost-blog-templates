@@ -5,6 +5,7 @@ import { authorName, authorUrl, getStore, postUrl, siteName, siteUrl } from "../
 import { renderPostHtml } from "../../../lib/render-post-html.ts";
 import { readingTimeMinutes } from "../../../lib/reading-time.ts";
 import { isValidSlug, serialiseJsonLd } from "../../../lib/scatterpost/safe-html.ts";
+import { postPath, postsAtRoot } from "../../../lib/scatterpost/post-paths.ts";
 import { TableOfContents } from "../../../components/table-of-contents.tsx";
 import { CodeCopyButtons } from "../../../components/code-copy-buttons.tsx";
 
@@ -80,7 +81,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     dateModified: post.date,
     url: canonical,
     mainEntityOfPage: canonical,
-    image: post.cover ? [post.cover] : [`${site}/blog/${post.slug}/opengraph-image`],
+    image: post.cover ? [post.cover] : [`${site}${postPath(post.slug)}/opengraph-image`],
     author,
     publisher: author,
   };
@@ -88,11 +89,18 @@ export default async function BlogPostPage({ params }: PageProps) {
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: siteName(), item: site },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${site}/blog` },
-      { "@type": "ListItem", position: 3, name: post.title, item: canonical },
-    ],
+    // With posts at the root, the listing is the home page itself, so
+    // the "Blog" level is dropped rather than pointing at a redirect.
+    itemListElement: postsAtRoot()
+      ? [
+          { "@type": "ListItem", position: 1, name: siteName(), item: site },
+          { "@type": "ListItem", position: 2, name: post.title, item: canonical },
+        ]
+      : [
+          { "@type": "ListItem", position: 1, name: siteName(), item: site },
+          { "@type": "ListItem", position: 2, name: "Blog", item: `${site}/blog` },
+          { "@type": "ListItem", position: 3, name: post.title, item: canonical },
+        ],
   };
 
   return (
@@ -131,7 +139,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         {previousPost || nextPost ? (
           <nav className="post-footer-nav" aria-label="More posts">
             {previousPost ? (
-              <Link href={`/blog/${previousPost.slug}`} className="prev">
+              <Link href={postPath(previousPost.slug)} className="prev">
                 <span className="label">Previous</span>
                 <span className="title">{previousPost.title}</span>
               </Link>
@@ -139,7 +147,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               <span />
             )}
             {nextPost ? (
-              <Link href={`/blog/${nextPost.slug}`} className="next">
+              <Link href={postPath(nextPost.slug)} className="next">
                 <span className="label">Next</span>
                 <span className="title">{nextPost.title}</span>
               </Link>
