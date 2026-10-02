@@ -1,0 +1,62 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/minimal", "destination": "https://REPLACE-minimal-demo.vercel.app/minimal" },
+    { "source": "/minimal/:path*", "destination": "https://REPLACE-minimal-demo.vercel.app/minimal/:path*" },
+    { "source": "/developer", "destination": "https://REPLACE-developer-demo.vercel.app/developer" },
+    { "source": "/developer/:path*", "destination": "https://REPLACE-developer-demo.vercel.app/developer/:path*" },
+    { "source": "/magazine", "destination": "https://REPLACE-magazine-demo.vercel.app/magazine" },
+    { "source": "/magazine/:path*", "destination": "https://REPLACE-magazine-demo.vercel.app/magazine/:path*" },
+    { "source": "/changelog", "destination": "https://REPLACE-changelog-demo.vercel.app/changelog" },
+    { "source": "/changelog/:path*", "destination": "https://REPLACE-changelog-demo.vercel.app/changelog/:path*" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; media-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; media-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" }
+      ]
+    },
+    {
+      "source": "/previews/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; media-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" }
+      ]
+    },
+    {
+      "source": "/styles.css",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; media-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" }
+      ]
+    },
+    {
+      "source": "/previews.js",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self'; media-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=()" }
+      ]
+    }
+  ]
+}

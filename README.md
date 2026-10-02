@@ -58,6 +58,7 @@ shared/             the scatterpost connector code once: signature verification,
                     their tests
 scripts/sync-shared.mjs   copies shared/ into <template>/src/lib/scatterpost/;
                           --check exits 1 if any copy has drifted
+demo/               static gallery site for demo.scatterpost.io; Vercel Root Directory = demo
 minimal/            self-contained Next.js app; Vercel Root Directory = minimal
 developer/          self-contained Next.js app; Vercel Root Directory = developer
 magazine/           self-contained Next.js app; Vercel Root Directory = magazine
