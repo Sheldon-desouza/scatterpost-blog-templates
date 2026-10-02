@@ -4,6 +4,7 @@ import Link from "next/link";
 import "./globals.css";
 import { bingSiteVerification, googleSiteVerification, siteDescription, siteName, siteUrl } from "../lib/site.ts";
 import { NAV_LINKS, showScatterpostBadge } from "../lib/config.ts";
+import { showPublishedWithBadge, showScatterpostCredit } from "../lib/scatterpost/scatterpost-credit.ts";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import { DemoBar } from "../components/DemoBar.tsx";
 import { ConsentBanner, CookieSettingsLink } from "../components/consent-banner.tsx";
@@ -54,6 +55,8 @@ export const metadata: Metadata = {
 const noFlashThemeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const showCredit = showScatterpostCredit();
+  const showBadge = showPublishedWithBadge(showCredit, showScatterpostBadge());
   return (
     <html lang="en-GB" className={`${geist.variable} ${geistMono.variable}`}>
       <head>
@@ -84,7 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <footer className="site-footer">
             <p>
               &copy; {new Date().getFullYear()} {siteName()}
-              {showScatterpostBadge() ? (
+              {showBadge ? (
                 <>
                   . Published with <a href="https://scatterpost.io">scatterpost</a>.
                 </>
@@ -97,6 +100,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/sitemap.xml">Sitemap</Link>
               <CookieSettingsLink />
             </div>
+            {showCredit ? (
+              <p className="footer-credit">
+                <a href="https://scatterpost.io/templates">Built with a scatterpost template</a>
+              </p>
+            ) : null}
           </footer>
         </div>
         <ConsentBanner />

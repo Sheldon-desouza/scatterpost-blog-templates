@@ -205,6 +205,10 @@ a {
   gap: 1.5rem;
 }
 
+.footer-credit {
+  flex-basis: 100%;
+}
+
 .measure {
   max-width: 68ch;
 }

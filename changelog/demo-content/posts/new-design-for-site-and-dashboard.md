@@ -2,17 +2,17 @@
 title: "A new look for the site and the dashboard"
 slug: "new-design-for-site-and-dashboard"
 date: "2026-10-01"
-description: "A full redesign brought plain-English dashboard screens, a posts journey view and clearer channel health to scatterpost."
+description: "A full redesign brought plain-English dashboard screens, a journey view for every post and clearer channel health to scatterpost."
 tags: ["changelog", "improved", "sample-entry"]
 scatterpostId: "demo-new-design-for-site-and-dashboard"
 ---
 
-Sample entry, adapted from scatterpost's own public changelog, shown here to demonstrate this template's `/changelog` timeline.
+Sample entry describing scatterpost, shown here to demonstrate this template's `/changelog` timeline.
 
-A full redesign brought plain-English dashboard screens, a posts journey view and clearer channel health to scatterpost.
+A full redesign brought plain-English dashboard screens, a journey view for every post and clearer channel health to scatterpost.
 
-- The site and the dashboard have a new design, with a light and dark mode you can switch.
-- The dashboard now opens on a plain-English getting-started checklist and a weekly timeline of scheduled and published posts.
-- Posts show a journey view with pipeline status for each platform, and the Channels page became a hub showing the health of every connection.
-- A failed publication to a single channel can now be retried on its own, and each channel has a test-connection check.
-- Team approvals now show who asked, why something was rejected, and exactly what changed in the post.
+- A new design for the site and the dashboard, with light and dark mode.
+- The dashboard opens on a plain-English getting-started checklist and a weekly timeline of scheduled and published posts.
+- Each post has a journey view showing where it has been published, and the Channels page shows how every connection is doing.
+- Retry a single channel without republishing everywhere, and check any connection with one click.
+- Team approvals show who asked, why a post was sent back, and what changed.
