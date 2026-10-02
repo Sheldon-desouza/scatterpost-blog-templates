@@ -69,4 +69,41 @@ describe("DemoContentStore", () => {
     expect(await real.get("new-post")).not.toBeNull();
     expect(await demo.get("new-post")).toBeNull();
   });
+
+  it("hides the bundled starter sample from the real store when listing", async () => {
+    const real = fakeStore([
+      post({ slug: "hello-world", scatterpostId: "sample-hello-world" }),
+      post({ slug: "real-post", scatterpostId: "idem_1", date: "2026-09-01T00:00:00.000Z" }),
+    ]);
+    const demo = fakeStore([post({ slug: "demo-post", scatterpostId: "demo_1", date: "2026-09-15T00:00:00.000Z" })]);
+    const store = new DemoContentStore(real, demo);
+
+    const posts = await store.list();
+    expect(posts.map((p) => p.slug).sort()).toEqual(["demo-post", "real-post"]);
+  });
+
+  it("hides the bundled starter sample from the real store when read by slug", async () => {
+    const real = fakeStore([post({ slug: "hello-world", scatterpostId: "sample-hello-world" })]);
+    const demo = fakeStore();
+    const store = new DemoContentStore(real, demo);
+
+    expect(await store.get("hello-world")).toBeNull();
+  });
+
+  it('still lists a real post whose id does not start with "sample-"', async () => {
+    const real = fakeStore([post({ slug: "real-post", scatterpostId: "idem_1" })]);
+    const demo = fakeStore();
+    const store = new DemoContentStore(real, demo);
+
+    const posts = await store.list();
+    expect(posts.map((p) => p.slug)).toEqual(["real-post"]);
+  });
+
+  it('still reads a real post whose id does not start with "sample-"', async () => {
+    const real = fakeStore([post({ slug: "real-post", scatterpostId: "idem_1", title: "Real" })]);
+    const demo = fakeStore();
+    const store = new DemoContentStore(real, demo);
+
+    expect((await store.get("real-post"))?.title).toBe("Real");
+  });
 });
