@@ -18,6 +18,9 @@ create table if not exists posts (
   updated_at timestamptz not null default now()
 );
 
+-- Idempotent for projects whose table predates cover_alt.
+alter table posts add column if not exists cover_alt text;
+
 create index if not exists posts_scatterpost_id_idx on posts (scatterpost_id);
 
 -- Row Level Security is ON, with NO policies, and every client grant is

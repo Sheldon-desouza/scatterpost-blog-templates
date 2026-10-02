@@ -16,13 +16,16 @@ export class DemoContentStore implements ContentStore {
 
   async list(): Promise<StoredPost[]> {
     const [demoPosts, realPosts] = await Promise.all([this.demo.list(), this.real.list()]);
-    return [...demoPosts, ...realPosts].sort((a, b) => (a.date < b.date ? 1 : -1));
+    const realSlugs = new Set(realPosts.map((post) => post.slug));
+    const demoPostsNotShadowed = demoPosts.filter((post) => !realSlugs.has(post.slug));
+    return [...demoPostsNotShadowed, ...realPosts].sort((a, b) => (a.date < b.date ? 1 : -1));
   }
 
   async get(slug: string): Promise<StoredPost | null> {
-    const demoPost = await this.demo.get(slug);
-    if (demoPost) return demoPost;
-    return this.real.get(slug);
+    // A real post always wins: a demo post must never shadow a published one.
+    const realPost = await this.real.get(slug);
+    if (realPost) return realPost;
+    return this.demo.get(slug);
   }
 
   save(post: StoredPost): Promise<SaveResult> {

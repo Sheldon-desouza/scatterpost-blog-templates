@@ -49,6 +49,7 @@ export function Cover({ title, cover, coverAlt, priority = false }: CoverProps) 
           height={675}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
+          referrerPolicy="no-referrer"
         />
       </div>
     );
