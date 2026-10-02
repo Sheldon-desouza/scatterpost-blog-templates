@@ -129,7 +129,7 @@ export default async function ChangelogEntryPage({ params }: PageProps) {
         {post.cover ? (
           <p className="entry-cover">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={post.cover} alt={post.coverAlt ?? post.title} width={1200} height={630} />
+            <img src={post.cover} alt={post.coverAlt ?? post.title} width={1200} height={630} referrerPolicy="no-referrer" />
           </p>
         ) : null}
         <div className="prose mt-10" dangerouslySetInnerHTML={{ __html: html }} />

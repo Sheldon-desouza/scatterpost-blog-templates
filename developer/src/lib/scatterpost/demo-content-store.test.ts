@@ -37,7 +37,7 @@ describe("DemoContentStore", () => {
     expect(posts.map((p) => p.slug).sort()).toEqual(["demo-post", "real-post"]);
   });
 
-  it("reads a demo post by slug before falling back to the real store", async () => {
+  it("reads a demo post by slug when there is no real post with that slug", async () => {
     const real = fakeStore([post({ slug: "shared-slug", title: "Real" })]);
     const demo = fakeStore([post({ slug: "demo-only", title: "Demo" })]);
     const store = new DemoContentStore(real, demo);
@@ -45,6 +45,18 @@ describe("DemoContentStore", () => {
     expect((await store.get("demo-only"))?.title).toBe("Demo");
     expect((await store.get("shared-slug"))?.title).toBe("Real");
     expect(await store.get("missing")).toBeNull();
+  });
+
+  it("never lets a demo post shadow a real post with the same slug", async () => {
+    const real = fakeStore([post({ slug: "shared-slug", title: "Real" })]);
+    const demo = fakeStore([post({ slug: "shared-slug", title: "Demo" })]);
+    const store = new DemoContentStore(real, demo);
+
+    expect((await store.get("shared-slug"))?.title).toBe("Real");
+
+    const posts = await store.list();
+    expect(posts).toHaveLength(1);
+    expect(posts[0]?.title).toBe("Real");
   });
 
   it("always writes to the real store, never the demo one", async () => {

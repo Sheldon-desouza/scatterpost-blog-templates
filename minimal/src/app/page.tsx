@@ -61,7 +61,7 @@ export default async function HomePage() {
               {featured.cover ? (
                 <div className="featured-cover">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={featured.cover} alt={featured.coverAlt ?? featured.title} width={600} height={400} />
+                  <img src={featured.cover} alt={featured.coverAlt ?? featured.title} width={600} height={400} referrerPolicy="no-referrer" />
                 </div>
               ) : null}
               <div className="featured-body">

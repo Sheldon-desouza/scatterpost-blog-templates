@@ -11,6 +11,28 @@ import type { NextConfig } from "next";
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || undefined;
 
+// A mismatch here means every absolute URL this template builds (canonical,
+// RSS, sitemap, llms.txt) points somewhere other than where the app is
+// actually served. This is a warning, not a build failure, since a bare
+// NEXT_PUBLIC_SITE_URL with no path is the normal, non-demo case.
+if (basePath) {
+  try {
+    const sitePath = new URL(process.env.NEXT_PUBLIC_SITE_URL || "").pathname.replace(/\/$/, "");
+    if (sitePath !== basePath) {
+      console.warn(
+        `[next.config] NEXT_PUBLIC_BASE_PATH ("${basePath}") does not match the path in ` +
+          `NEXT_PUBLIC_SITE_URL ("${sitePath}"). Absolute URLs built from NEXT_PUBLIC_SITE_URL ` +
+          `(canonical, RSS, sitemap, llms.txt) will not match where this app is actually served.`,
+      );
+    }
+  } catch {
+    console.warn(
+      `[next.config] NEXT_PUBLIC_BASE_PATH ("${basePath}") is set but NEXT_PUBLIC_SITE_URL is ` +
+        `missing or not a valid URL, so it cannot be checked against the base path.`,
+    );
+  }
+}
+
 const nextConfig: NextConfig = {
   ...(basePath ? { basePath } : {}),
 };
