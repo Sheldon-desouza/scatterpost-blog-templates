@@ -42,7 +42,7 @@
             <source data-src="/previews/minimal.webm" type="video/webm">
             <source data-src="/previews/minimal.mp4" type="video/mp4">
           </video>
-          <img class="card-poster" src="/previews/minimal.png" alt="" loading="lazy" width="960" height="600" onerror="this.closest('.card-preview').classList.add('placeholder'); this.remove();">
+          <img class="card-poster" src="/previews/minimal.png" alt="" loading="lazy" width="960" height="600">
           <span class="placeholder-label">Minimal</span>
         </a>
         <div class="card-body">
@@ -61,7 +61,7 @@
             <source data-src="/previews/developer.webm" type="video/webm">
             <source data-src="/previews/developer.mp4" type="video/mp4">
           </video>
-          <img class="card-poster" src="/previews/developer.png" alt="" loading="lazy" width="960" height="600" onerror="this.closest('.card-preview').classList.add('placeholder'); this.remove();">
+          <img class="card-poster" src="/previews/developer.png" alt="" loading="lazy" width="960" height="600">
           <span class="placeholder-label">Developer</span>
         </a>
         <div class="card-body">
@@ -80,7 +80,7 @@
             <source data-src="/previews/magazine.webm" type="video/webm">
             <source data-src="/previews/magazine.mp4" type="video/mp4">
           </video>
-          <img class="card-poster" src="/previews/magazine.png" alt="" loading="lazy" width="960" height="600" onerror="this.closest('.card-preview').classList.add('placeholder'); this.remove();">
+          <img class="card-poster" src="/previews/magazine.png" alt="" loading="lazy" width="960" height="600">
           <span class="placeholder-label">Magazine</span>
         </a>
         <div class="card-body">
@@ -99,7 +99,7 @@
             <source data-src="/previews/changelog.webm" type="video/webm">
             <source data-src="/previews/changelog.mp4" type="video/mp4">
           </video>
-          <img class="card-poster" src="/previews/changelog.png" alt="" loading="lazy" width="960" height="600" onerror="this.closest('.card-preview').classList.add('placeholder'); this.remove();">
+          <img class="card-poster" src="/previews/changelog.png" alt="" loading="lazy" width="960" height="600">
           <span class="placeholder-label">Changelog</span>
         </a>
         <div class="card-body">
@@ -115,12 +115,46 @@
     </div>
   </section>
 
+  <section class="why-template wrap" aria-labelledby="why-heading">
+    <h2 id="why-heading">Why start from a template instead of building your own</h2>
+    <p class="lede">You could build a blog from scratch. These templates skip the parts that take the longest to get right.</p>
+    <div class="why-grid">
+
+      <article class="why-card">
+        <h3>Ready for scatterpost on day one</h3>
+        <p>The part that receives your posts is already built. Paste the secret from scatterpost into your blog's settings and your assistant can publish straight away. No webhook code to write or test.</p>
+      </article>
+
+      <article class="why-card">
+        <h3>Search basics done for you</h3>
+        <p>Sitemap, RSS feed, canonical links, structured data and social preview images are generated from every post, plus an llms.txt file that helps AI assistants read your site.</p>
+      </article>
+
+      <article class="why-card">
+        <h3>New posts get noticed sooner</h3>
+        <p>Each new post is announced through IndexNow, so search engines that support it, such as Bing, hear about it straight away instead of waiting for the next crawl.</p>
+      </article>
+
+      <article class="why-card">
+        <h3>Yours to keep</h3>
+        <p>MIT licensed, on your own domain and your own Vercel account. Change anything you like. If you stop using scatterpost, the blog and every post stay with you.</p>
+      </article>
+
+      <article class="why-card">
+        <h3>Small details already handled</h3>
+        <p>Light and dark mode, readable on a phone, keyboard friendly, and a cookie consent banner that only loads analytics after a visitor agrees.</p>
+      </article>
+
+    </div>
+    <p class="fine-print muted-text">Already have a website? You do not need a template. Connect your existing site in scatterpost instead.</p>
+  </section>
+
   <section class="how-it-works wrap" aria-labelledby="how-heading">
     <h2 id="how-heading">How it works</h2>
     <ol class="steps">
       <li>
         <span class="step-number">1</span>
-        <p>Deploy the template, one click, free on Vercel.</p>
+        <p>Deploy the template, one click, on your own Vercel account.</p>
       </li>
       <li>
         <span class="step-number">2</span>

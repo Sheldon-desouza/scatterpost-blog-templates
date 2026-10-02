@@ -1,9 +1,35 @@
 // Loads each template's preview video only once its card nears the
 // viewport, and leaves it unloaded entirely under reduced motion (the
 // poster image shown by CSS is enough there). Kept out of index.html
-// so an inline script is never required.
+// so an inline script is never required: no onerror or other inline
+// handler on any element, every fallback lives here instead.
 (function () {
   "use strict";
+
+  function showPlaceholder(posterImg) {
+    var preview = posterImg.closest(".card-preview");
+    if (preview) {
+      preview.classList.add("placeholder");
+    }
+    posterImg.remove();
+  }
+
+  // If the poster image itself fails to load, fall back to the
+  // placeholder label rather than showing a broken image.
+  [].forEach.call(document.querySelectorAll(".card-poster"), function (posterImg) {
+    posterImg.addEventListener("error", function () {
+      showPlaceholder(posterImg);
+    });
+  });
+
+  // If a preview video fails to load or play, fall back to its poster
+  // image: hide the video and let the poster (already in the DOM,
+  // behind it) show through.
+  [].forEach.call(document.querySelectorAll(".card-video"), function (video) {
+    video.addEventListener("error", function () {
+      video.style.display = "none";
+    });
+  });
 
   function loadVideo(video) {
     var sources = video.querySelectorAll("source[data-src]");

@@ -242,6 +242,41 @@ a {
   border-color: var(--border);
 }
 
+.why-template {
+  padding: 1rem 0 3.5rem;
+  border-top: 1px solid var(--border);
+  padding-top: 3rem;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.why-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.why-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.muted-text {
+  color: var(--muted);
+}
+
 .how-it-works {
   padding: 1rem 0 3.5rem;
   border-top: 1px solid var(--border);

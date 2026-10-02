@@ -8,8 +8,30 @@ static HTML and CSS, no framework, no build step.
 
 - Vercel project, Root Directory set to `demo`.
 - Domain: `demo.scatterpost.io`.
-- No build command, no output directory override needed, it is a static
-  folder.
+- No output directory override needed, it is a static folder.
+- Build command: `node ../scripts/check-demo-hub.mjs` (or, from the repo
+  root, `npm run check:demo-hub`). This fails the build while
+  `vercel.json` still has a `REPLACE-` placeholder in it, see below, so a
+  forgotten rewrite destination cannot ship.
+
+## CSP and security headers
+
+`vercel.json` matches a header rule's `source` against the incoming request
+path before the rewrites above run, so a rule of `/(.*)` would also land on
+every `/minimal`, `/developer`, `/magazine` and `/changelog` response,
+stacking the hub's strict Content-Security-Policy on top of (or breaking)
+whatever headers that template project already sends. The CSP,
+`X-Frame-Options` and `Permissions-Policy` headers are therefore scoped to
+the exact paths this static site serves (`/`, `/index.html`,
+`/previews/*`, `/styles.css`, `/previews.js`), not to `/(.*)`, so they never
+touch a rewritten template response. `X-Content-Type-Options` and
+`Referrer-Policy` stay on `/(.*)` since they do not break a template app.
+
+## Pre-deploy step
+
+Run `npm run check:demo-hub` (or `node scripts/check-demo-hub.mjs` from the
+repo root) before every deploy. It exits non-zero if `demo/vercel.json`
+still contains a `REPLACE-` placeholder.
 
 ## Rewrites to fill in
 

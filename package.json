@@ -7,6 +7,7 @@
   "scripts": {
     "sync": "node scripts/sync-shared.mjs",
     "check": "node scripts/sync-shared.mjs --check",
-    "verify": "node scripts/verify-templates.mjs"
+    "verify": "node scripts/verify-templates.mjs",
+    "check:demo-hub": "node scripts/check-demo-hub.mjs"
   }
 }
